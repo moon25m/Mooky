@@ -1,7 +1,8 @@
 // getDatoCmsToken.ts
 
 export const getDatoCmsToken = (): string => {
-  const hostname = window.location.hostname;
+  // Guard for non-browser or early import
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
 
   switch (hostname) {
     case 'ror.sumanthsamala.com':
@@ -23,6 +24,8 @@ export const getDatoCmsToken = (): string => {
       return process.env.REACT_APP_DATOCMS_NODE_TOKEN ?? '';
 
     default:
-      throw new Error(`No DatoCMS token configured for hostname: ${hostname}`);
+      // Safe fallback to avoid crashing on unknown domains (e.g., Vercel preview/prod)
+      // Supports a generic token if provided; otherwise empty string (queries may 401 but won't crash render)
+      return process.env.REACT_APP_DATOCMS_DEFAULT_TOKEN ?? '';
   }
 };
