@@ -136,7 +136,7 @@ export default function Wish() {
   if (hasBadWord(clean)) return toast.error('Inappropriate language is not allowed.');
     setSending(true);
     try {
-      const res = await fetch('/api/wishes', {
+      const res = await fetch('/api/wish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), message: clean })
