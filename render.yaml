@@ -5,7 +5,7 @@ services:
   - type: web
     name: mookyverse
     env: node
-    plan: free
+    plan: starter # fix: disks are not supported on the free plan
     branch: main
     region: oregon
     buildCommand: |

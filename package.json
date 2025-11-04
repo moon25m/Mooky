@@ -27,6 +27,7 @@
     "react-scripts": "5.0.1",
     "react-vertical-timeline-component": "^3.6.0",
     "timeago.js": "^4.0.2",
+    "@neondatabase/serverless": "^0.9.5",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
@@ -34,6 +35,9 @@
     "start": "react-scripts start",
     "server": "node server/index.js",
   "dev": "concurrently -k -n app,api -c green,cyan \"cross-env PORT=3002 GENERATE_SOURCEMAP=false npm start\" \"npm run server\"",
+    "start:prod": "npm run build && cross-env SERVE_STATIC=1 NODE_ENV=production PORT=4001 node server/index.js",
+    "share:cf": "concurrently -k -n server,tunnel -c green,cyan \"npm run start:prod\" \"cloudflared tunnel --url http://localhost:4001\"",
+    "share:lt": "concurrently -k -n server,tunnel -c green,cyan \"npm run start:prod\" \"npx -y localtunnel --port 4001\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
