@@ -61,6 +61,7 @@ export default function Wish() {
   useEffect(() => {
     (async () => {
       let list: WishItem[] = [];
+      let usedSeed = false;
       try {
         const res = await fetch('/api/wishes', { cache: 'no-store' });
         if (res.ok) {
@@ -78,12 +79,25 @@ export default function Wish() {
           if (sres.ok) {
             const seeds = await sres.json().catch(() => []);
             const seeded = normalizeList(seeds).filter((w: WishItem) => !hasBadWord(w.message));
-            if (seeded.length) list = seeded;
+            if (seeded.length) { list = seeded; usedSeed = true; }
           }
         } catch {
           // still nothing; leave list empty
         }
       }
+
+      // If we had to use seeds but there's cached wishes (e.g., recent sends), merge and prefer cached
+      try {
+        if (usedSeed) {
+          const cached = JSON.parse(localStorage.getItem('mooky:wishes') || '[]') as WishItem[];
+          if (Array.isArray(cached) && cached.length) {
+            const map = new Map<string, WishItem>();
+            for (const w of list) map.set(w.id, w);
+            for (const w of cached) map.set(w.id, w); // cached wins
+            list = Array.from(map.values());
+          }
+        }
+      } catch {}
 
       list.sort((a,b)=>b.createdAt - a.createdAt);
       knownIds.current = new Set(list.map(w=>w.id));
