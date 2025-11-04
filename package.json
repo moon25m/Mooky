@@ -39,6 +39,7 @@
     "share:cf": "concurrently -k -n server,tunnel -c green,cyan \"npm run start:prod\" \"cloudflared tunnel --url http://localhost:4001\"",
     "share:lt": "concurrently -k -n server,tunnel -c green,cyan \"npm run start:prod\" \"npx -y localtunnel --port 4001\"",
   "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
+    "seed:wishes": "node scripts/seed-wishes.js"
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
