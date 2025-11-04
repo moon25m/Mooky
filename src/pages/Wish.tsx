@@ -101,10 +101,13 @@ export default function Wish() {
         const data = JSON.parse(e.data);
         if (data.type === 'snapshot') {
           const list: WishItem[] = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
-          list.sort((a,b)=>b.createdAt - a.createdAt);
-          knownIds.current = new Set(list.map(w=>w.id));
-          setWishes(list);
-          localStorage.setItem('mooky:wishes', JSON.stringify(list));
+          // If the DB snapshot is empty, keep whatever we already have (e.g., static fallback)
+          if (list.length) {
+            list.sort((a,b)=>b.createdAt - a.createdAt);
+            knownIds.current = new Set(list.map(w=>w.id));
+            setWishes(list);
+            localStorage.setItem('mooky:wishes', JSON.stringify(list));
+          }
         }
         if (data.type === 'wish') {
           const w: WishItem = normalizeWish(data.wish);
