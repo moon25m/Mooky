@@ -5,6 +5,9 @@
   "framework": "create-react-app",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/((?!api|static|favicon\\.ico|robots\\.txt|manifest\\.json|asset-manifest\\.json|.*\\.[^/]+$).*)",
+      "destination": "/"
+    }
   ]
 }
