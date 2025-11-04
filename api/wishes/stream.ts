@@ -3,6 +3,22 @@ import { getDb, listWishes, listWishesSince } from '../_lib/db';
 export const runtime = 'edge';
 
 export default async function handler(_req: Request) {
+  if (!process.env.DATABASE_URL) {
+    // Return an SSE stream that immediately informs client of misconfiguration
+    const msg = `data: ${JSON.stringify({ type: 'error', error: 'DATABASE_URL missing on server' })}\n\n`;
+    return new Response(new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(msg));
+        controller.close();
+      }
+    }), {
+      headers: {
+        'content-type': 'text/event-stream',
+        'cache-control': 'no-cache, no-transform',
+        'connection': 'keep-alive'
+      }
+    });
+  }
   const encoder = new TextEncoder();
   let lastTs: string | null = null;
 

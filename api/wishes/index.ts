@@ -5,6 +5,10 @@ export const runtime = 'edge';
 
 export default async function handler(req: Request) {
   try {
+    // Early guard: make misconfiguration obvious and return JSON instead of a Vercel HTML error
+    if (!process.env.DATABASE_URL) {
+      return json({ ok: false, error: 'Database is not configured on the server (missing DATABASE_URL). Please set it in Vercel → Project → Settings → Environment Variables.' }, { status: 503 });
+    }
     if (req.method === 'GET') {
       const rows = await listWishes(getDb());
       return json({ wishes: rows });
