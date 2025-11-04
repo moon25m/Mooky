@@ -24,19 +24,19 @@ async function ensureSchema(sql = getDb()) {
 
 export async function listWishes(sql = getDb()): Promise<Wish[]> {
   await ensureSchema(sql);
-  const rows = await sql<Wish>`select id, name, message, created_at from wishes order by created_at desc`;
-  return rows;
+  const rows = await sql`select id, name, message, created_at from wishes order by created_at desc` as any;
+  return rows as Wish[];
 }
 
 export async function listWishesSince(ts: string, sql = getDb()): Promise<Wish[]> {
   await ensureSchema(sql);
-  const rows = await sql<Wish>`select id, name, message, created_at from wishes where created_at > ${ts} order by created_at asc`;
-  return rows;
+  const rows = await sql`select id, name, message, created_at from wishes where created_at > ${ts} order by created_at asc` as any;
+  return rows as Wish[];
 }
 
 export async function insertWish(name: string, message: string, sql = getDb()): Promise<Wish> {
   await ensureSchema(sql);
   const id = crypto.randomUUID();
-  const rows = await sql<Wish>`insert into wishes (id, name, message) values (${id}, ${name}, ${message}) returning id, name, message, created_at`;
-  return rows[0];
+  const rows = await sql`insert into wishes (id, name, message) values (${id}, ${name}, ${message}) returning id, name, message, created_at` as any;
+  return (rows as Wish[])[0];
 }
