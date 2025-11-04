@@ -63,7 +63,18 @@ export default function Wish() {
       try {
   const res = await fetch('/api/wishes', { cache: 'no-store' });
   const data = await res.json();
-  const list: WishItem[] = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
+  let list: WishItem[] = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
+  // Fallback: if API is empty or failed silently, load seed file from public assets
+  if (!Array.isArray(data?.wishes) || list.length === 0) {
+    try {
+      const sres = await fetch('/assets/wishes.seed.json', { cache: 'no-store' });
+      if (sres.ok) {
+        const seeds = await sres.json();
+        const seeded = normalizeList(seeds).filter((w: WishItem) => !hasBadWord(w.message));
+        if (seeded.length) list = seeded;
+      }
+    } catch {}
+  }
         list.sort((a,b)=>b.createdAt - a.createdAt);
         knownIds.current = new Set(list.map(w=>w.id));
         setWishes(list);
