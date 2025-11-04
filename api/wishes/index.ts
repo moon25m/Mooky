@@ -1,7 +1,7 @@
 import { getDb, insertWish, listWishes } from '../_lib/db';
 import { containsBadWords } from '../_lib/profanity';
 
-export const runtime = 'edge';
+export const config = { runtime: 'edge' } as const;
 
 export default async function handler(req: Request) {
   try {

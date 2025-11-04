@@ -1,6 +1,6 @@
 import { getDb } from '../_lib/db';
 
-export const runtime = 'edge';
+export const config = { runtime: 'edge' } as const;
 
 function mask(url?: string) {
   if (!url) return '';

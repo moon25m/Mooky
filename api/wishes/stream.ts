@@ -1,6 +1,6 @@
 import { getDb, listWishes, listWishesSince } from '../_lib/db';
 
-export const runtime = 'edge';
+export const config = { runtime: 'edge' } as const;
 
 export default async function handler(_req: Request) {
   if (!process.env.DATABASE_URL) {
