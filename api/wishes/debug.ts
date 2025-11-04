@@ -1,33 +1,3 @@
-import { neon } from '@neondatabase/serverless';
-
-export const runtime = 'edge';
-
-function json(obj: any, init: ResponseInit = {}) {
-  return new Response(JSON.stringify(obj), { ...init, headers: { 'content-type': 'application/json', ...(init.headers||{}) } });
-}
-
-export default async function handler(_req: Request) {
-  try {
-    const url = process.env.DATABASE_URL;
-    if (!url) return json({ ok: false, error: 'DATABASE_URL not set on server' }, { status: 502 });
-
-    // Mask the URL for safety; show only host
-    let host = 'unknown';
-    try { host = new URL(url).host; } catch {}
-
-    const sql = neon(url);
-    try {
-      // quick check: count rows
-      const rows = await sql`select count(*)::int as c from wishes`;
-      const count = Array.isArray(rows) && rows[0] && typeof rows[0].c !== 'undefined' ? rows[0].c : null;
-      return json({ ok: true, dbHost: host, count });
-    } catch (e: any) {
-      return json({ ok: false, dbHost: host, error: String(e?.message || e) }, { status: 500 });
-    }
-  } catch (e: any) {
-    return json({ ok: false, error: String(e?.message || e) }, { status: 500 });
-  }
-}
 import { getDb } from '../_lib/db';
 
 export const runtime = 'edge';
