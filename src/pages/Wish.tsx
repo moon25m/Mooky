@@ -38,14 +38,32 @@ export default function Wish() {
     } catch {}
   }, []);
 
+  // Normalize server wish objects (supports snake_case created_at or camelCase createdAt)
+  function normalizeWish(w: any): WishItem {
+    const created = (w && (w.createdAt ?? w.created_at)) as any;
+    let ts: number;
+    if (typeof created === 'number') ts = created;
+    else if (typeof created === 'string') ts = new Date(created).getTime();
+    else ts = Date.now();
+    return {
+      id: String(w.id),
+      name: String(w.name || ''),
+      message: String(w.message || ''),
+      createdAt: ts
+    };
+  }
+
+  function normalizeList(arr: any[]): WishItem[] {
+    return (Array.isArray(arr) ? arr : []).map(normalizeWish);
+  }
+
   // Initial snapshot via REST (authoritative)
   useEffect(() => {
     (async () => {
       try {
   const res = await fetch('/api/wishes', { cache: 'no-store' });
   const data = await res.json();
-  const arr = Array.isArray(data?.wishes) ? (data.wishes as WishItem[]) : [];
-  const list: WishItem[] = arr.filter((w: WishItem) => !hasBadWord(w.message));
+  const list: WishItem[] = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
         list.sort((a,b)=>b.createdAt - a.createdAt);
         knownIds.current = new Set(list.map(w=>w.id));
         setWishes(list);
@@ -61,15 +79,14 @@ export default function Wish() {
       try {
         const data = JSON.parse(e.data);
         if (data.type === 'snapshot') {
-          const arr = Array.isArray(data?.wishes) ? (data.wishes as WishItem[]) : [];
-          const list: WishItem[] = arr.filter((w: WishItem) => !hasBadWord(w.message));
+          const list: WishItem[] = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
           list.sort((a,b)=>b.createdAt - a.createdAt);
           knownIds.current = new Set(list.map(w=>w.id));
           setWishes(list);
           localStorage.setItem('mooky:wishes', JSON.stringify(list));
         }
         if (data.type === 'wish') {
-          const w: WishItem = data.wish;
+          const w: WishItem = normalizeWish(data.wish);
           if (hasBadWord(w.message)) return; // drop inappropriate wishes client-side as a safeguard
           if (knownIds.current.has(w.id)) return; // dedupe
           knownIds.current.add(w.id);

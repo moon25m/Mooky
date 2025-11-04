@@ -38,7 +38,7 @@
     "start:prod": "npm run build && cross-env SERVE_STATIC=1 NODE_ENV=production PORT=4001 node server/index.js",
     "share:cf": "concurrently -k -n server,tunnel -c green,cyan \"npm run start:prod\" \"cloudflared tunnel --url http://localhost:4001\"",
     "share:lt": "concurrently -k -n server,tunnel -c green,cyan \"npm run start:prod\" \"npx -y localtunnel --port 4001\"",
-    "build": "react-scripts build",
+  "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

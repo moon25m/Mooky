@@ -1,7 +1,9 @@
 export const SPLASH_NAME = "MOOKY";
 // The first interactive page in this app is the profiles screen
 export const SPLASH_REDIRECT_PATH = "/browse";
-export const SPLASH_DELAY_MS = 8000; // 8 seconds
+// Allow override via env (use REACT_APP_SPLASH_DELAY_MS in ms). Defaults to 8000ms.
+const delayFromEnv = Number(process.env.REACT_APP_SPLASH_DELAY_MS || "");
+export const SPLASH_DELAY_MS = Number.isFinite(delayFromEnv) && delayFromEnv > 0 ? delayFromEnv : 8000; // ms
 
 // Optional: adjust the fade duration to match CSS
 export const SPLASH_FADE_MS = 400; // keep in sync with CSS transition
