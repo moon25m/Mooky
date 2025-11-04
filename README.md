@@ -121,3 +121,5 @@ Your feedback is valuable and helps make this project better for everyone. Thank
 This project is licensed under the MIT License. Feel free to use it, modify it, and share it! 🌈
 
 ---
+
+Deployment heartbeat: 2025-11-05 — no-op change to trigger Vercel redeploy on main.
