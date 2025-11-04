@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="240" viewBox="0 0 300 240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFDEE9"/>
+      <stop offset="100%" stop-color="#B5FFFC"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="240" fill="url(#bg)"/>
+  <g opacity="0.7">
+    <circle cx="80" cy="60" r="26" fill="#FFC1CC"/>
+    <circle cx="220" cy="60" r="26" fill="#FFC1CC"/>
+    <rect x="80" y="50" width="140" height="20" fill="#FFC1CC" transform="skewX(-25)" opacity="0.3"/>
+  </g>
+  <path d="M150 160c30-30 70-10 55 18-12 24-36 22-55 5-19 17-43 19-55-5-15-28 25-48 55-18z" fill="#FF7A8A"/>
+  <text x="150" y="215" text-anchor="middle" font-family="Bebas Neue, Arial" font-size="28" fill="#7A2E2E">Dawn</text>
+</svg>

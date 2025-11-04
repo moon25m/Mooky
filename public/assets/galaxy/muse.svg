@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="240" viewBox="0 0 300 240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4B2E83"/>
+      <stop offset="100%" stop-color="#9C7AE6"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="240" fill="url(#bg)"/>
+  <g stroke="#E6DAFF" stroke-width="2" opacity="0.7">
+    <path d="M80 90 Q150 40 220 90" fill="none"/>
+    <path d="M80 120 Q150 70 220 120" fill="none"/>
+  </g>
+  <path d="M150 160c30-30 70-10 55 18-12 24-36 22-55 5-19 17-43 19-55-5-15-28 25-48 55-18z" fill="#B388FF"/>
+  <text x="150" y="215" text-anchor="middle" font-family="Bebas Neue, Arial" font-size="28" fill="#EDE3FF">Muse</text>
+</svg>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="MOOKY wordmark (black background)">
+  <defs>
+    <filter id="softShadow" x="-20%" y="-50%" width="140%" height="200%">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-opacity="0.45" flood-color="#000000"/>
+    </filter>
+    <style><![CDATA[
+      .word {
+        font-family: 'Bebas Neue', 'Anton', 'Impact', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 800;
+        font-size: 300px;
+        fill: #E50914;
+        letter-spacing: 10px;
+      }
+      @media (max-width: 640px) {
+        .word { font-size: 240px; letter-spacing: 8px; }
+      }
+    ]]></style>
+  </defs>
+
+  <!-- Solid black background -->
+  <rect x="0" y="0" width="1024" height="1024" fill="#000000"/>
+
+  <!-- Slight upward (concave) arc centered horizontally -->
+  <path id="arc" d="M 112 560 C 384 480, 640 480, 912 560" fill="none" />
+
+  <g filter="url(#softShadow)">
+    <text class="word">
+      <textPath href="#arc" startOffset="50%" text-anchor="middle">MOOKY</textPath>
+    </text>
+  </g>
+</svg>

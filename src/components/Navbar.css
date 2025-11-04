@@ -24,18 +24,28 @@
   align-items: center;
 }
 
-.navbar-logo img {
-  height: 30px;
-  margin-right: 30px;
+.brand-text {
+  font-weight: 900;
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
+  color: #E50914;
+  text-decoration: none;
+  margin-right: 2rem;
   margin-left: 10px;
-  margin-top: 5px;
+}
+
+/* Ensure inline logo components fit the header nicely */
+.brand-logo {
+  display: block;
+  height: 26px; /* slightly smaller like Netflix */
+  width: auto;
 }
 
 /* Navbar Links */
 .navbar-links {
   display: flex;
   list-style: none;
-  gap: 20px;
+  gap: 2rem;
   padding: 0;
   margin: 0;
 }
@@ -44,11 +54,27 @@
   color: #fff;
   text-decoration: none;
   font-size: 1.05rem;
-  transition: color 0.3s;
+  position: relative;
+  transition: color 0.25s ease;
 }
 
 .navbar-links li a:hover {
-  color: #e50914; /* Netflix red */
+  color: #ff2f3f; /* Brighter red on hover */
+}
+
+/* Underline slide-in */
+.navbar-links li a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  background: #ff2f3f;
+  transition: width 200ms ease;
+}
+.navbar-links li a:hover::after {
+  width: 100%;
 }
 
 /* Profile Icon */
@@ -74,6 +100,11 @@
     height: 20px;
     margin-right: auto;
   }
+  .brand-text {
+    font-size: 1.2rem;
+    margin-right: auto;
+  }
+  .brand-logo { height: 22px; }
   .profile-icon {
     width: 24px;
     height: 24px;

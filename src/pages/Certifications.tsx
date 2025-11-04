@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isNavLocked } from '../lib/access';
 import './Certifications.css';
 import { FaExternalLinkAlt, FaUniversity } from 'react-icons/fa';
 import { SiUdemy, SiCoursera, SiIeee } from 'react-icons/si';
@@ -12,6 +14,10 @@ const iconData: { [key: string]: JSX.Element } = {
 }
 
 const Certifications: React.FC = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isNavLocked('/letters')) navigate('/', { replace: true });
+  }, [navigate]);
 
   const [certifications, setCertifications] = useState<Certification[]>([]);
 
@@ -28,6 +34,7 @@ const Certifications: React.FC = () => {
 
   return (
     <div className="certifications-container">
+      <h1 className="certifications-title">Letters</h1>
       <div className="certifications-grid">
         {certifications.map((cert, index) => (
           <a href={cert.link} key={index} target="_blank" rel="noopener noreferrer" className="certification-card" style={{ '--delay': `${index * 0.2}s` } as React.CSSProperties}>

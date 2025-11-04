@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0b1a3a"/>
+      <stop offset="100%" stop-color="#143d7a"/>
+    </linearGradient>
+  </defs>
+  <rect width="220" height="220" fill="url(#g)"/>
+  <circle cx="110" cy="110" r="62" fill="#1f4aa3" opacity="0.35"/>
+  <circle cx="140" cy="82" r="6" fill="#8ecbff"/>
+  <circle cx="70" cy="136" r="4" fill="#c0d9ff"/>
+  <text x="110" y="190" text-anchor="middle" font-family="Bebas Neue, Arial, sans-serif" font-size="28" fill="#ffffff">Galaxy</text>
+</svg>

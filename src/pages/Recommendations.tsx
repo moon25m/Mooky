@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isNavLocked } from '../lib/access';
 import './Recommendations.css';
 import chrisProfilePic from '../images/chris.jpg'; // Adjust the path based on your directory structure
 
 const Recommendations: React.FC = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isNavLocked('/whisper')) navigate('/', { replace: true });
+  }, [navigate]);
   return (
     <div className='timeline-container'>
+      <h1 className="recommendations-title">Whisper</h1>
       <div className="recommendation-card">
         <div className="recommendation-header">
           <img src={chrisProfilePic} alt="Chris Smith" className="profile-pic" />

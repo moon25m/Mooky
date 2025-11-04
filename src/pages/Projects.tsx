@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isNavLocked } from '../lib/access';
 import './Projects.css';
 import { FaReact, FaNodeJs, FaAws, FaDatabase, FaDocker, FaAngular, FaGithub, FaGitlab, FaGoogle, FaJava, FaJenkins, FaMicrosoft, FaPython, FaVuejs } from 'react-icons/fa';
 import { SiRubyonrails, SiPostgresql, SiMongodb, SiMaterialdesign, SiHtml5, SiCss3, SiJquery, SiAwsamplify, SiFirebase, SiTerraform, SiArgo } from 'react-icons/si';
@@ -62,6 +64,10 @@ const techIcons: { [key: string]: JSX.Element } = {
 
 const Projects: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([])
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isNavLocked('/projects')) navigate('/', { replace: true });
+  }, [navigate]);
   
   useEffect(() => { 
     async function fetchProjects() {

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="240" viewBox="0 0 300 240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B1B3A"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7AB8FF"/>
+      <stop offset="100%" stop-color="rgba(122,184,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="240" fill="url(#bg)"/>
+  <rect x="60" y="60" width="180" height="120" fill="url(#fade)"/>
+  <text x="150" y="210" text-anchor="middle" font-family="Bebas Neue, Arial" font-size="28" fill="#CFE5FF">Fade</text>
+</svg>

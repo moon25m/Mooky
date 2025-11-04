@@ -12,6 +12,34 @@
   margin-bottom: 10px;
 }
 
+/* Scoped subtitle styling */
+.continue-watching-row .row-subtitle {
+  margin: 0 0 12px 0;
+  color: #b3b3b3;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(-6px);
+  animation: subtitleIn 600ms ease 180ms forwards;
+}
+
+@keyframes subtitleIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Galaxy-specific hover color palette for poetic titles */
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(1):hover .pick-label { color: #2fd3c7; } /* Echo */
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(2):hover .pick-label { color: #7ab8ff; } /* Fade */
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(3):hover .pick-label { color: #c6a8ff; } /* Whisper */
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(4):hover .pick-label { color: #a8ff60; } /* Glow */
+
+/* Matching glow tint on hover */
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(1):hover { box-shadow: 0 8px 20px rgba(47, 211, 199, 0.45); }
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(2):hover { box-shadow: 0 8px 20px rgba(122, 184, 255, 0.45); }
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(3):hover { box-shadow: 0 8px 20px rgba(198, 168, 255, 0.45); }
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(4):hover { box-shadow: 0 8px 20px rgba(168, 255, 96, 0.45); }
+
 .card-row {
   display: flex;
   gap: 10px;

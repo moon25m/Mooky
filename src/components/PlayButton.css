@@ -2,17 +2,18 @@
   display: inline-flex;
   align-items: center;
   padding: 10px 20px;
-  background-color: #ffffff; 
+  background-color: #E50914; 
   color: #fff;
   font-weight: bold;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: transform 160ms ease, filter 160ms ease;
 }
 
 .play-button:hover {
-  background-color: grey; /* Darker shade for hover */
+  transform: translateY(-1px) scale(1.02);
+  filter: brightness(1.05);
 }
 
 .icon-container {
@@ -27,5 +28,5 @@
 
 .label {
   font-size: 1rem;
-  color: black;
+  color: white;
 }

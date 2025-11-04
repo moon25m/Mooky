@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isNavLocked } from '../lib/access';
 import './ContactMe.css';
 import profilePic from '../images/sumanth.jpeg';
 import { FaEnvelope, FaPhoneAlt, FaCoffee, FaLinkedin } from 'react-icons/fa';
@@ -6,6 +8,10 @@ import { ContactMe as IContactMe } from '../types';
 import { getContactMe } from '../queries/getContactMe';
 
 const ContactMe: React.FC = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isNavLocked('/contact-me')) navigate('/', { replace: true });
+  }, [navigate]);
 
   const [userData, setUserData] = useState<IContactMe>()
 
@@ -23,7 +29,7 @@ const ContactMe: React.FC = () => {
   return (
     <div className="contact-container">
       <div className="linkedin-badge-custom">
-        <img src={profilePic} alt="Sumanth Samala" className="badge-avatar" />
+  <img src={profilePic} alt="Mooky" className="badge-avatar" />
         <div className="badge-content">
           <h3 className="badge-name">{userData?.name}</h3>
           <p className="badge-title">{userData.title}</p>

@@ -1,0 +1,110 @@
+.mooky-logo {
+  position: relative;
+  display: inline-flex;
+  gap: 0.04em;
+  line-height: 1;
+  -webkit-user-select: none;
+  user-select: none;
+  font-family: 'Bebas Neue', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transform-origin: left center;
+}
+
+.mooky-logo span {
+  position: relative;
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+  color: var(--brand-white);
+  text-shadow:
+    0 1px 0 rgba(0,0,0,.5),
+    0 8px 24px rgba(0,0,0,.55);
+  -webkit-text-stroke: 1px rgba(0,0,0,.35);
+  background:
+    linear-gradient(#ff3344, #E50914 46%, #b10810 60%, #7f070c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  transform: translateY(18px) scale(.98);
+  animation: logoIn .9s cubic-bezier(.22,.75,.25,1) forwards;
+}
+
+.mooky-logo span:nth-child(1){ animation-delay: .00s; }
+.mooky-logo span:nth-child(2){ animation-delay: .05s; }
+.mooky-logo span:nth-child(3){ animation-delay: .10s; }
+.mooky-logo span:nth-child(4){ animation-delay: .15s; }
+.mooky-logo span:nth-child(5){ animation-delay: .20s; }
+
+@keyframes logoIn {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.mooky-logo:hover span {
+  animation: logoIn .6s ease-out forwards, glow 1.8s ease-in-out infinite;
+}
+@keyframes glow {
+  0%,100% { filter: drop-shadow(0 0 0 rgba(229,9,20,0)); }
+  50%     { filter: drop-shadow(0 0 12px rgba(229,9,20,.45)); }
+}
+
+.mooky-logo::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -20%;
+  width: 20%;
+  transform: skewX(-20deg) translateX(-120%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  pointer-events: none;
+  opacity: 0;
+}
+.brand:hover .mooky-logo::after {
+  animation: sweep 1s ease;
+  opacity: 1;
+}
+@keyframes sweep {
+  0%   { transform: skewX(-20deg) translateX(-120%); opacity:.0; }
+  35%  { opacity:.8; }
+  100% { transform: skewX(-20deg) translateX(320%); opacity:.0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mooky-logo span { animation: none; opacity: 1; transform: none; }
+  .brand:hover .mooky-logo::after { animation: none; opacity: 0; }
+}
+
+.brand { display:flex; align-items:center; gap:.4rem; text-decoration:none; }
+
+/* Optional intro animation helper for SVG and span-based logos */
+.mooky-animate span,
+.mooky-animate text {
+  opacity: 0;
+  transform: translateY(18px) scale(.98);
+  animation: logoIn .9s cubic-bezier(.22,.75,.25,1) forwards;
+}
+
+/* Navbar/Sidebar compact Netflix-style settle for SVG 'word' */
+.brand .brand-logo.mooky-animate {
+  transform: translateZ(0) scale(0.98);
+  animation: logoPop .55s cubic-bezier(.2,.7,.2,1) forwards;
+}
+.brand .brand-logo.mooky-animate .word {
+  animation: trackIn .5s ease-out .08s forwards;
+}
+
+@keyframes logoPop {
+  0%   { transform: translateZ(0) scale(0.98); }
+  60%  { transform: translateZ(0) scale(1.02); }
+  100% { transform: translateZ(0) scale(1.00); }
+}
+
+@keyframes trackIn {
+  from { letter-spacing: 9px; }
+  to   { letter-spacing: 5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand .brand-logo.mooky-animate { animation: none; transform: none; }
+  .brand .brand-logo.mooky-animate .word { animation: none; }
+}

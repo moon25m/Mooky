@@ -1,55 +1,70 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
-import blueImage from '../images/blue.png';
-import greyImage from '../images/grey.png';
-import redImage from '../images/red.png';
-import yellowImage from '../images/yellow.png';
 import './browse.css';
+import { useMookyTitle } from '../lib/useMookyTitle';
+import { profileMeta, ProfileType, LOCKED_BY_DEFAULT, LOCK_BADGE_TEXT } from '../types';
+import { profileRoute } from '../lib/routes';
+import { isUnlocked, setUnlocked } from '../lib/locks';
+import LockModal from '../components/LockModal';
+import '../styles/locks.css';
 
 const Browse: React.FC = () => {
   const navigate = useNavigate();
+  // Home-like page title
+  useMookyTitle('home');
 
-  const profiles = [
-    {
-      name: "recruiter",
-      image: blueImage,
-      backgroundGif: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTZ5eWwwbjRpdWM1amxyd3VueHhteTVzajVjeGZtZGJ1dDc4MXMyNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9dg/16u7Ifl2T4zYfQ932F/giphy.gif" // Dark storm clouds
-    },
-    {
-      name: "developer",
-      image: greyImage,
-      backgroundGif: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGNidDl5emZpejY2eGFxa2I4NW0zZGNpbWRlbnBrZ3N2dWhhbzM1MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/TFPdmm3rdzeZ0kP3zG/giphy.gif" // Flickering neon lights
-    },
-    {
-      name: "stalker",
-      image: redImage,
-      backgroundGif: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExc28yMjMyZmJ6eWtxbmNwdDV6cXk4dWZmcjFhZms2cXBjN2h5ZDJjeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QjZXUBUr89CkiWLPjL/giphy.gif" // Dark, abstract digital lights
-    },
-    {
-      name: "adventurer",
-      image: yellowImage,
-      backgroundGif: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmxib24ycWo2cjlmazh0NGV5NTZ2Mzd2YWY0M2tvam9oYXBwYW1ocCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ERKMnDK6tkzJe8YVa3/giphy-downsized-large.gif" // Dark ocean waves at night
-    },
-  ];
+  const [pendingProfile, setPendingProfile] = React.useState<ProfileType | null>(null);
 
-  const handleProfileClick = (profile: { name: string; image: string; backgroundGif: string }) => {
-    navigate(`/profile/${profile.name}`, { state: { profileImage: profile.image, backgroundGif: profile.backgroundGif } });
+  const profiles = (Object.keys(profileMeta) as ProfileType[]).map((key) => profileMeta[key]);
+
+  const handleProfileClick = (meta: typeof profiles[number]) => {
+    const p = meta.slug as ProfileType;
+    const unlocked = !LOCKED_BY_DEFAULT[p] || isUnlocked(p);
+    if (unlocked) {
+      navigate(profileRoute(p), { state: { profileImage: meta.img, backgroundGif: undefined } });
+    } else {
+      setPendingProfile(p);
+    }
+  };
+
+  const handleUnlockSuccess = () => {
+    if (!pendingProfile) return;
+    // Per-session unlock with 15-minute TTL
+    setUnlocked(pendingProfile, true, { session: true, ttlMs: 15 * 60 * 1000 });
+    const meta = profileMeta[pendingProfile];
+    const p = pendingProfile;
+    setPendingProfile(null);
+    navigate(profileRoute(p), { state: { profileImage: meta.img, backgroundGif: undefined } });
   };
 
   return (
     <div className="browse-container">
-      <p className='who-is-watching'>Who's Watching?</p>
+      <h1 className='who-is-watching'>Where the heart still orbits.</h1>
+      <p className='who-subtitle'>Choose a star to follow ✨</p>
       <div className="profiles">
-        {profiles.map((profile, index) => (
-          <ProfileCard
-            key={index}
-            name={profile.name}
-            image={profile.image}
-            onClick={() => handleProfileClick(profile)}
-          />
-        ))}
+        {profiles.map((meta, index) => {
+          const p = meta.slug as ProfileType;
+          const unlocked = !LOCKED_BY_DEFAULT[p] || isUnlocked(p);
+          return (
+            <ProfileCard
+              key={index}
+              name={meta.label}
+              image={meta.img}
+              onClick={() => handleProfileClick(meta)}
+              locked={!unlocked}
+              lockBadgeText={LOCK_BADGE_TEXT}
+            />
+          );
+        })}
       </div>
+      {pendingProfile && (
+        <LockModal
+          profile={pendingProfile}
+          onClose={() => setPendingProfile(null)}
+          onSuccess={handleUnlockSuccess}
+        />
+      )}
     </div>
   );
 };

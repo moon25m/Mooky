@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="240" viewBox="0 0 300 240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2B2B2B"/>
+      <stop offset="100%" stop-color="#121212"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="240" fill="url(#bg)"/>
+  <g>
+    <circle cx="100" cy="100" r="4" fill="#FFA86B"/>
+    <circle cx="130" cy="90" r="3" fill="#FFC48C"/>
+    <circle cx="170" cy="80" r="5" fill="#FFA86B"/>
+    <circle cx="200" cy="100" r="3" fill="#FFC48C"/>
+    <circle cx="160" cy="120" r="4" fill="#FFA86B"/>
+  </g>
+  <path d="M150 160c30-30 70-10 55 18-12 24-36 22-55 5-19 17-43 19-55-5-15-28 25-48 55-18z" fill="#FF9F43"/>
+  <text x="150" y="215" text-anchor="middle" font-family="Bebas Neue, Arial" font-size="28" fill="#FFD0A0">Flicker</text>
+</svg>

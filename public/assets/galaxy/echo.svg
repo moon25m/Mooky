@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="240" viewBox="0 0 300 240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B2B2B"/>
+      <stop offset="100%" stop-color="#146A68"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="240" fill="url(#bg)"/>
+  <g fill="none" stroke="#2FD3C7" stroke-width="3" opacity="0.9">
+    <circle cx="150" cy="120" r="16"/>
+    <circle cx="150" cy="120" r="32" opacity="0.7"/>
+    <circle cx="150" cy="120" r="48" opacity="0.4"/>
+  </g>
+  <text x="150" y="210" text-anchor="middle" font-family="Bebas Neue, Arial" font-size="28" fill="#A8FFF4">Echo</text>
+</svg>

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isNavLocked } from '../lib/access';
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
 import { MdOutlineWork as WorkIcon } from 'react-icons/md';
@@ -10,6 +12,10 @@ import { getTimeline } from '../queries/getTimeline';
 
 
 const WorkExperience: React.FC = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isNavLocked('/echoes')) navigate('/', { replace: true });
+  }, [navigate]);
 
   const [timeLineData, setTimeLineData] = useState<TimelineItem[] | null>(null);
 
@@ -28,6 +34,7 @@ const WorkExperience: React.FC = () => {
   return (
     <>
       <div className="timeline-container">
+        <h1 className="timeline-title">Echoes</h1>
         <h2 className="timeline-title">📅 Work Experience & Education Timeline</h2>
       </div>
       <VerticalTimeline>

@@ -1,0 +1,42 @@
+.lock-backdrop {
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 60;
+  background: rgba(0,0,0,.6); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  display: grid; place-items: center;
+}
+.lock-card {
+  width: min(90vw, 380px); background: #141414; color: #fff;
+  border-radius: 14px; padding: 20px 18px; box-shadow: 0 10px 40px rgba(0,0,0,.6);
+}
+.lock-title { font-weight: 800; letter-spacing:.2px; margin-bottom: 10px; }
+.lock-input {
+  width: 100%; background: #232323; color:#fff; border:1px solid #333; border-radius:10px;
+  padding: 12px 14px; outline: none;
+}
+.lock-input:focus { border-color: #e50914; box-shadow: 0 0 0 3px rgba(229,9,20,.25); }
+.lock-error { color: #ff6b6b; margin-top: 8px; font-size: .9rem; }
+.lock-actions { display:flex; justify-content:flex-end; gap:10px; margin-top: 14px; }
+.btn-primary { background:#e50914; color:#fff; border:0; padding:10px 14px; border-radius:10px; }
+.btn-secondary { background:#2a2a2a; color:#fff; border:0; padding:10px 14px; border-radius:10px; }
+
+.profile-card { position: relative; }
+.profile-card.is-locked .profile-image { filter: grayscale(1) brightness(.85); }
+.lock-badge {
+  position: absolute; right: 8px; top: 8px; display:flex; align-items:center; gap:6px;
+  background: rgba(0,0,0,.55); padding: 6px 9px; border-radius: 999px; font-size:.8rem;
+  border: 1px solid rgba(255,255,255,.12); color:#e5e5e5;
+}
+.lock-icon { width: 16px; height:16px; fill:#e5e5e5; }
+
+.profile-card.is-locked:hover { transform: translateY(-1px); }
+.profile-card:hover .lock-badge { background: rgba(0,0,0,.7); }
+
+@media (prefers-reduced-motion: reduce){
+  .profile-card.is-locked:hover { transform: none; }
+}
+
+/* subtle hint styling */
+.lock-hint {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #b3b3b3;
+}

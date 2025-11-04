@@ -10,23 +10,35 @@
     "@types/node": "^16.18.115",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "canvas-confetti": "^1.9.4",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.19",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.2",
+    "linkifyjs": "^4.3.2",
+    "nodemailer": "^6.9.14",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hot-toast": "^2.6.0",
     "react-icons": "^5.3.0",
     "react-router-dom": "^6.27.0",
     "react-scripts": "5.0.1",
     "react-vertical-timeline-component": "^3.6.0",
+    "timeago.js": "^4.0.2",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
+    "server": "node server/index.js",
+  "dev": "concurrently -k -n app,api -c green,cyan \"cross-env PORT=3002 GENERATE_SOURCEMAP=false npm start\" \"npm run server\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://localhost:4001",
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -46,6 +58,9 @@
     ]
   },
   "devDependencies": {
-    "@types/react-vertical-timeline-component": "^3.3.6"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@types/react-vertical-timeline-component": "^3.3.6",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3"
   }
 }

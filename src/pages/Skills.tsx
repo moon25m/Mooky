@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isNavLocked } from '../lib/access';
 import './Skills.css';
 import { getSkills } from '../queries/getSkills';
 
-import { FaReact, FaNodeJs, FaAws, FaDocker, FaGitAlt, FaJava } from 'react-icons/fa';
-import { SiRubyonrails, SiTypescript, SiPostgresql, SiMysql, SiKubernetes, SiGooglecloud, SiSpringboot, SiPhp, SiNetlify, SiHeroku, SiHtml5, SiCss3, SiRabbitmq, SiImessage } from 'react-icons/si';
+import { FaReact, FaNodeJs, FaAws, FaDocker, FaJava } from 'react-icons/fa';
+import { SiRubyonrails, SiTypescript, SiPostgresql, SiMysql, SiKubernetes, SiGooglecloud, SiSpringboot, SiPhp, SiNetlify, SiHeroku, SiRabbitmq, SiImessage } from 'react-icons/si';
 import { Skill } from '../types';
 
 const iconMap: { [key: string]: JSX.Element } = {
@@ -28,6 +30,10 @@ const iconMap: { [key: string]: JSX.Element } = {
 
 
 const Skills: React.FC = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isNavLocked('/moments')) navigate('/', { replace: true });
+  }, [navigate]);
 
   const [skillsData, setSkillsData] = useState<Skill[]>([]);
 
@@ -51,6 +57,7 @@ const Skills: React.FC = () => {
 
   return (
     <div className="skills-container">
+      <h1 className="skills-title">Moments</h1>
       {Object.keys(skillsByCategory).map((category, index) => (
         <div key={index} className="skill-category">
           <h3 className="category-title">{category}</h3>

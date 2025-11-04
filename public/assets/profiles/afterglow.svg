@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#2a0f0f"/>
+      <stop offset="100%" stop-color="#8a1e1e"/>
+    </linearGradient>
+  </defs>
+  <rect width="220" height="220" fill="url(#g)"/>
+  <circle cx="110" cy="110" r="64" fill="#ff5a5f" opacity="0.25"/>
+  <rect x="40" y="140" width="140" height="6" fill="#ffa07a" opacity="0.6"/>
+  <text x="110" y="190" text-anchor="middle" font-family="Bebas Neue, Arial, sans-serif" font-size="28" fill="#ffffff">Afterglow</text>
+</svg>
