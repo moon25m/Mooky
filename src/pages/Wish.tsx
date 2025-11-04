@@ -145,6 +145,17 @@ export default function Wish() {
         const b = await res.json().catch(() => ({}));
         throw new Error(b?.error || 'Request failed');
       }
+      // Optimistic update so the new wish appears instantly; SSE will reconcile
+      const body = await res.json().catch(() => ({}));
+      const newId = body?.id || `tmp-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}`;
+      const optimistic: WishItem = { id: String(newId), name: name.trim() || 'Anonymous', message: clean, createdAt: Date.now() };
+      knownIds.current.add(optimistic.id);
+      setWishes(prev => {
+        const next = [{ ...optimistic, __flash: true }, ...prev].sort((a,b)=>b.createdAt - a.createdAt);
+        localStorage.setItem('mooky:wishes', JSON.stringify(next));
+        return next;
+      });
+      setTimeout(() => setWishes(prev => prev.map(x => ({ ...x, __flash: false })) as WishWithFlash[]), 1200);
       setMessage('');
       toast.success('Wish sent!');
       confetti({ particleCount: 90, spread: 65, origin: { y: 0.25 } });

@@ -26,7 +26,12 @@ export default async function handler(_req: Request) {
     async start(controller) {
       // initial snapshot
       const rows = await listWishes(getDb());
-      if (rows.length) lastTs = rows[0].created_at;
+      if (rows.length) {
+        lastTs = rows[0].created_at;
+      } else {
+        // DB is empty: start polling from "now" so future inserts are picked up
+        lastTs = new Date().toISOString();
+      }
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type:'snapshot', wishes: rows })}\n\n`));
 
       // poll loop (edge-safe)
