@@ -57,29 +57,39 @@ export default function Wish() {
     return (Array.isArray(arr) ? arr : []).map(normalizeWish);
   }
 
-  // Initial snapshot via REST (authoritative)
+  // Initial snapshot via REST (authoritative) with robust fallback
   useEffect(() => {
     (async () => {
+      let list: WishItem[] = [];
       try {
-  const res = await fetch('/api/wishes', { cache: 'no-store' });
-  const data = await res.json();
-  let list: WishItem[] = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
-  // Fallback: if API is empty or failed silently, load seed file from public assets
-  if (!Array.isArray(data?.wishes) || list.length === 0) {
-    try {
-      const sres = await fetch('/assets/wishes.seed.json', { cache: 'no-store' });
-      if (sres.ok) {
-        const seeds = await sres.json();
-        const seeded = normalizeList(seeds).filter((w: WishItem) => !hasBadWord(w.message));
-        if (seeded.length) list = seeded;
+        const res = await fetch('/api/wishes', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          list = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
+        }
+      } catch {
+        // ignore and try fallback
       }
-    } catch {}
-  }
-        list.sort((a,b)=>b.createdAt - a.createdAt);
-        knownIds.current = new Set(list.map(w=>w.id));
-        setWishes(list);
-        localStorage.setItem('mooky:wishes', JSON.stringify(list));
-      } finally { setLoading(false); }
+
+      // Fallback: if API is empty or failed, load seed file from public assets
+      if (!list.length) {
+        try {
+          const sres = await fetch('/assets/wishes.seed.json', { cache: 'no-store' });
+          if (sres.ok) {
+            const seeds = await sres.json().catch(() => []);
+            const seeded = normalizeList(seeds).filter((w: WishItem) => !hasBadWord(w.message));
+            if (seeded.length) list = seeded;
+          }
+        } catch {
+          // still nothing; leave list empty
+        }
+      }
+
+      list.sort((a,b)=>b.createdAt - a.createdAt);
+      knownIds.current = new Set(list.map(w=>w.id));
+      setWishes(list);
+      localStorage.setItem('mooky:wishes', JSON.stringify(list));
+      setLoading(false);
     })();
   }, []);
 
