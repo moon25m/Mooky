@@ -89,10 +89,19 @@ export default function Wish() {
       let list: WishItem[] = [];
       let usedSeed = false;
       try {
-        const res = await fetch('/api/wishes', { cache: 'no-store' });
+        // Prefer Node runtime endpoint first to ensure consistency with count & POST
+        let res = await fetch('/api/wish', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json().catch(() => ({}));
-          list = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
+          list = normalizeList((data as any)?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
+        }
+        // If Node endpoint failed or empty, try Edge endpoint as secondary
+        if (!list.length) {
+          res = await fetch('/api/wishes', { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json().catch(() => ({}));
+            list = normalizeList((data as any)?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
+          }
         }
       } catch {
         // ignore and try fallback
