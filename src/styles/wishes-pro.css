@@ -7,6 +7,8 @@
 .wish-hero-inner .count{background:#1d1d1d;border:1px solid #2b2b2b;border-radius:999px;padding:2px 8px;margin-left:6px;font-size:.9rem}
 .live-pill{display:inline-flex;align-items:center;gap:6px;background:#1d1d1d;border:1px solid #2b2b2b;border-radius:999px;padding:2px 8px;margin-left:6px;font-size:.9rem;opacity:.9}
 .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#e50914;margin-left:8px;box-shadow:0 0 0 0 rgba(229,9,20,.7);animation:pulse 1.6s infinite}
+.presence{margin-left:8px;opacity:.9}
+.typing-indicator{margin-top:6px;font-size:12px;opacity:.8}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(229,9,20,.6)}70%{box-shadow:0 0 0 8px rgba(229,9,20,0)}100%{box-shadow:0 0 0 0 rgba(229,9,20,0)}}
 
 .composer{background:#121212;border:1px solid #222;border-radius:14px;padding:12px 12px 10px;margin-bottom:14px}

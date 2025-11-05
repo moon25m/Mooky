@@ -17,10 +17,11 @@ if (appId && key && secret && cluster) {
 }
 
 const CHANNEL = 'wishes';
+const PRESENCE_CHANNEL = 'presence-wishes';
 const EVENTS = {
   NEW: 'wish:new',
   TYPING_START: 'wish:typing_start',
   TYPING_STOP: 'wish:typing_stop',
 };
 
-module.exports = { pusher, CHANNEL, EVENTS };
+module.exports = { pusher, CHANNEL, EVENTS, PRESENCE_CHANNEL };

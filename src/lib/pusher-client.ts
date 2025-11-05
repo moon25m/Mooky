@@ -10,7 +10,12 @@ if (!key || !cluster) {
 }
 
 export const pusherClient = key && cluster
-  ? new PusherClient(key, { cluster, forceTLS: true })
+  ? new PusherClient(key, {
+      cluster,
+      forceTLS: true,
+      // v8 API: configure server auth endpoint for private/presence channels
+  channelAuthorization: { endpoint: '/api/pusher/auth', transport: 'ajax' }
+    })
   : null;
 
 export const CHANNEL = 'wishes';
@@ -19,3 +24,4 @@ export const EVENTS = {
   TYPING_START: 'wish:typing_start',
   TYPING_STOP: 'wish:typing_stop',
 } as const;
+export const PRESENCE = 'presence-wishes';

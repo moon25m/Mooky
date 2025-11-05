@@ -35,7 +35,7 @@ export default function Wish() {
   };
 
   // Realtime via Pusher: subscribe and append incoming wishes
-  useRealtimeWishes((row) => {
+  const { typing, presence } = useRealtimeWishes((row) => {
     const w: WishItem = {
       id: String((row as any).id),
       name: String((row as any).name || ''),
@@ -55,6 +55,7 @@ export default function Wish() {
   });
 
   // Prime from cache fast
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     try {
       const cached = JSON.parse(localStorage.getItem('mooky:wishes') || '[]') as WishItem[];
@@ -67,6 +68,7 @@ export default function Wish() {
   }, []);
 
   // SWR polling fallback: if SSE/Pusher are unavailable, reconcile with /api/wish list periodically
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     try {
       const incoming = normalizeList((swrList as any)?.wishes || [])
@@ -105,6 +107,7 @@ export default function Wish() {
   }
 
   // Initial snapshot via REST (authoritative) with robust fallback
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     (async () => {
       let list: WishItem[] = [];
@@ -165,6 +168,7 @@ export default function Wish() {
   }, []);
 
   // SSE live updates + highlight
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const es = new EventSource('/api/wishes/stream');
     es.onmessage = (e) => {
@@ -260,6 +264,7 @@ export default function Wish() {
             Leave a message — it appears live on this wall.
             <span className="count">{(typeof (swrCount as any)?.count === 'number' ? (swrCount as any).count : totalCount) + 1} wishes</span>
             <span className="live-pill"><span className="live-dot" aria-label="live" title="Live"/> Live</span>
+            {presence > 0 && <span className="presence">• {presence} here now</span>}
           </p>
           <div className="surprise-cta">
             <a href="/surprise" className="btn-primary surprise-link">Surprise ✨</a>
@@ -309,7 +314,7 @@ export default function Wish() {
             />
           </div>
           {/* Typing indicator */}
-          <TypingIndicator />
+          <TypingIndicator typing={typing || undefined} />
           <div className="bar">
             <span className={`counter ${remaining < 0 ? 'bad' : ''}`}>{remaining}</span>
             <button className="btn-primary" disabled={sending || message.trim().length === 0}>
@@ -356,8 +361,7 @@ export default function Wish() {
 }
 
 // Small typing indicator bound to a separate hook instance
-function TypingIndicator(){
-  const { typing } = useRealtimeWishes();
+function TypingIndicator({ typing }: { typing?: string }){
   if (!typing) return null;
-  return <div style={{ marginTop: 6, fontSize: 12, opacity: 0.8 }}>{typing}</div>;
+  return <div className="typing-indicator">{typing}</div>;
 }
