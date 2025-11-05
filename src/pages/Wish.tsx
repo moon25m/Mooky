@@ -339,7 +339,7 @@ export default function Wish() {
               <time title={new Date(PINNED.createdAt).toLocaleString()}>{timeago(PINNED.createdAt)}</time>
               <span className="pill">Pinned</span>
             </header>
-            <p className="text" dangerouslySetInnerHTML={{ __html: linkifyText(PINNED.message) }} />
+            <ShowMoreMessage html={linkifyText(PINNED.message)} />
           </div>
         </article>
 
@@ -351,7 +351,7 @@ export default function Wish() {
                 <b className="who">{w.name || 'Anonymous'}</b>
                 <time title={new Date(w.createdAt).toLocaleString()}>{timeago(w.createdAt)}</time>
               </header>
-              <p className="text" dangerouslySetInnerHTML={{ __html: linkifyText(w.message) }} />
+              <ShowMoreMessage html={linkifyText(w.message)} />
             </div>
           </article>
         ))}
@@ -364,4 +364,44 @@ export default function Wish() {
 function TypingIndicator({ typing }: { typing?: string }){
   if (!typing) return null;
   return <div className="typing-indicator">{typing}</div>;
+}
+
+// Show-more component for long wish messages. Uses CSS line-clamp when collapsed and
+// measures overflow to decide whether to show the toggle.
+function ShowMoreMessage({ html, lines = 3 }: { html: string; lines?: number }){
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [needsToggle, setNeedsToggle] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Give browser a tick to apply styles, then detect overflow
+    const id = window.setTimeout(() => {
+      // If scrollHeight > clientHeight, content is clipped by line-clamp
+      setNeedsToggle(el.scrollHeight > el.clientHeight + 1);
+    }, 0);
+    return () => clearTimeout(id);
+  }, [html, lines]);
+
+  return (
+    <div className="text">
+      <div
+        ref={ref}
+        className={`wish-message ${!expanded ? 'clamped' : ''}`}
+        style={!expanded ? { WebkitLineClamp: lines } as React.CSSProperties : undefined}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+      {needsToggle && (
+        <button
+          type="button"
+          className="show-more-button"
+          onClick={() => setExpanded(e => !e)}
+          aria-expanded={expanded}
+        >
+          {expanded ? 'Show less' : 'Show more'}
+        </button>
+      )}
+    </div>
+  );
 }

@@ -34,6 +34,11 @@
 .meta .who{font-weight:700}
 .meta time{font-size:.9rem; opacity:.75}
 .text{line-height:1.45; white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word}
+
+/* Show more / collapsible message */
+.wish-message.clamped{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+.show-more-button{background:transparent;border:0;color:#9ad1ff;cursor:pointer;padding:6px 0;margin-top:6px;font-weight:700}
+.show-more-button:focus{outline:2px solid rgba(154,209,255,0.14);outline-offset:2px;border-radius:4px}
 .text a{color:#9ad1ff; text-decoration:underline}
 
 .skeleton,.empty{background:#141414;border:1px solid #222;border-radius:14px;padding:18px;text-align:center;opacity:.85}
