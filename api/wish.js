@@ -1,18 +1,15 @@
 // Node.js Serverless Function for creating a wish (CommonJS)
-// Endpoint: POST /api/wish
+// Endpoint: GET/POST /api/wish
 // - Validates JSON body { name?, message }
 // - Inserts into Postgres (Neon) using parameterized SQL
-// - Returns 201 with { ok: true, id }
+// - Returns 201 with { ok: true, data: row }
+// - GET returns latest 100 with Cache-Control: no-store
 
 const { neon } = require('@neondatabase/serverless');
 const { randomUUID } = require('crypto');
 
 function send(res, status, body) {
-  res
-    .status(status)
-    .setHeader('content-type', 'application/json')
-    .setHeader('cache-control', 'no-store')
-    .send(JSON.stringify(body));
+  res.status(status).setHeader('content-type', 'application/json').send(JSON.stringify(body));
 }
 
 async function readRawBody(req) {
@@ -27,19 +24,32 @@ async function readRawBody(req) {
 }
 
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return send(res, 405, { ok: false, error: 'Method not allowed' });
-  }
+  const method = (req.method || 'GET').toUpperCase();
 
   const requestId = req.headers?.['x-vercel-id'] || req.headers?.['x-request-id'] || undefined;
 
   try {
     const url = process.env.DATABASE_URL;
     if (!url) {
-      console.error('POST /api/wish env-missing', { requestId });
+      console.error(method + ' /api/wish env-missing', { requestId });
       return send(res, 503, { ok: false, error: 'DATABASE_URL is not configured on the server' });
     }
+    const sql = neon(url);
 
+    if (method === 'GET') {
+      // Ensure table exists (idempotent)
+      await sql`create table if not exists wishes (
+        id text primary key,
+        name text not null,
+        message text not null,
+        created_at timestamptz not null default now()
+      )`;
+      const rows = await sql`select id, name, message, created_at from wishes order by created_at desc limit 100`;
+      res.setHeader('cache-control', 'no-store, no-cache, must-revalidate');
+      return send(res, 200, { ok: true, data: rows });
+    }
+
+    // POST
     // Parse JSON body safely (may be undefined, string, Buffer, object, or stream)
     let body = req.body;
     if (!body) {
@@ -61,14 +71,11 @@ module.exports = async function handler(req, res) {
 
     console.info('POST /api/wish', { requestId, len: message.length });
 
-  const sql = neon(url);
-  const id = randomUUID();
-
-  const rows = await sql`insert into wishes (id, name, message) values (${id}, ${name}, ${message}) returning id, name, message, created_at`;
-  const row = Array.isArray(rows) && rows[0] ? rows[0] : { id, name, message, created_at: new Date().toISOString() };
-  return send(res, 201, { ok: true, wish: { id: row.id, name: row.name, message: row.message, createdAt: Date.parse(row.created_at) || Date.now() } });
+    const id = randomUUID();
+    const rows = await sql`insert into wishes (id, name, message) values (${id}, ${name}, ${message}) returning id, name, message, created_at`;
+    return send(res, 201, { ok: true, data: rows?.[0] });
   } catch (err) {
-    console.error('POST /api/wish', { error: err?.message || String(err) });
+    console.error(method + ' /api/wish', { error: err?.message || String(err) });
     return send(res, 500, { ok: false, error: err?.message || 'Server error' });
   }
 };

@@ -123,3 +123,38 @@ This project is licensed under the MIT License. Feel free to use it, modify it, 
 ---
 
 Deployment heartbeat: 2025-11-05 — no-op change to trigger Vercel redeploy on main.
+
+---
+
+## Wishes – Ops Notes
+
+Environment
+- Set `DATABASE_URL` in Vercel → Project → Settings → Environment Variables (Production).
+- Do not expose it to the client; server-only.
+
+API endpoints
+- `GET /api/wish` (Node): returns latest 100 rows. Headers include `Cache-Control: no-store` to bypass CDN/browser caches.
+- `POST /api/wish` (Node): inserts `{ name?, message }` and returns the created row `{ id, name, message, created_at }`.
+- `GET /api/wishes/stream` (Edge): server-sent events for live updates.
+- `GET /api/wishes/debug` (Edge): connectivity + row count.
+
+Observability
+- Vercel → Deployments → Functions: see logs. Look for `POST /api/wish` and `GET /api/wish` entries.
+- Errors include full messages; POST logs payload length not content.
+
+Local dev quick test
+```bash
+bash scripts/dev-test.sh
+```
+
+Production quick test (set DEPLOY_URL or use default)
+```bash
+bash scripts/prod-test.sh
+```
+
+Expected responses
+- `POST /api/wish` → `201 { ok: true, data: { id, name, message, created_at } }`
+- `GET /api/wish` → `200 { ok: true, data: [ ... ] }`
+
+Client behavior
+- Optimistic add on send; live SSE updates; periodic refresh every 8s and on focus; newest first.
