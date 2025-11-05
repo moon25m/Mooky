@@ -11,6 +11,25 @@ import { mutate as globalMutate } from 'swr';
 export type WishItem = { id: string; name: string; message: string; createdAt: number };
 type WishWithFlash = WishItem & { __flash?: boolean };
 
+// Normalize server wish objects (supports snake_case created_at or camelCase createdAt)
+function normalizeWish(w: any): WishItem {
+  const created = (w && (w.createdAt ?? w.created_at)) as any;
+  let ts: number;
+  if (typeof created === 'number') ts = created;
+  else if (typeof created === 'string') ts = new Date(created).getTime();
+  else ts = Date.now();
+  return {
+    id: String(w.id),
+    name: String(w.name || ''),
+    message: String(w.message || ''),
+    createdAt: ts
+  };
+}
+
+function normalizeList(arr: any[]): WishItem[] {
+  return (Array.isArray(arr) ? arr : []).map(normalizeWish);
+}
+
 export default function Wish() {
   const [wishes, setWishes] = useState<WishWithFlash[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -87,24 +106,7 @@ export default function Wish() {
     } catch {}
   }, [swrList]);
 
-  // Normalize server wish objects (supports snake_case created_at or camelCase createdAt)
-  function normalizeWish(w: any): WishItem {
-    const created = (w && (w.createdAt ?? w.created_at)) as any;
-    let ts: number;
-    if (typeof created === 'number') ts = created;
-    else if (typeof created === 'string') ts = new Date(created).getTime();
-    else ts = Date.now();
-    return {
-      id: String(w.id),
-      name: String(w.name || ''),
-      message: String(w.message || ''),
-      createdAt: ts
-    };
-  }
-
-  function normalizeList(arr: any[]): WishItem[] {
-    return (Array.isArray(arr) ? arr : []).map(normalizeWish);
-  }
+  
 
   // Initial snapshot via REST (authoritative) with robust fallback
   // eslint-disable-next-line react-hooks/exhaustive-deps
