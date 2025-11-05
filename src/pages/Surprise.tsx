@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import '../styles/surprise.css';
+import SurpriseControls from '../components/SurpriseControls';
 
 const BASE_SURPRISE_URL = process.env.REACT_APP_SURPRISE_URL || 'https://hbd-card.netlify.app/';
 
@@ -56,17 +57,7 @@ export default function Surprise(){
     };
   }, [embedReady]);
 
-  const toggleFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await embedWrapRef.current?.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
-      }
-    } catch {
-      // ignore
-    }
-  };
+  // Fullscreen is controlled by SurpriseControls now; we keep isFs only to flip CSS class.
 
   return (
     <main className="surprise-shell">
@@ -76,11 +67,10 @@ export default function Surprise(){
       </section>
 
       {/* Try to embed the external project output */}
-  <section className={`surprise-embed ${isFs ? 'is-fs' : ''}`} ref={embedWrapRef}>
-        <div className="toolbar">
-          <a className="btn-primary" href={SURPRISE_URL} target="_blank" rel="noopener noreferrer">Open in new tab</a>
-          <button type="button" className="btn-secondary" onClick={toggleFullscreen}>{isFs ? 'Exit Fullscreen' : 'Fullscreen'}</button>
-        </div>
+      <section id="surprise-stage" className={`surprise-embed ${isFs ? 'is-fs' : ''}`} ref={embedWrapRef}>
+            <div className="toolbar">
+              <SurpriseControls targetId="surprise-stage" openHref={SURPRISE_URL} />
+            </div>
         <div className={`embed-frame ${loading ? 'loading' : ''}`}>
           <iframe
           ref={iframeRef}
