@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
-import '../styles/surprise.css';
-import SurpriseControls from '../components/SurpriseControls';
+import StageControls from '../components/StageControls';
+import HeaderOpenButton from '../components/HeaderOpenButton';
 
 const BASE_SURPRISE_URL = process.env.REACT_APP_SURPRISE_URL || 'https://hbd-card.netlify.app/';
 
@@ -10,9 +10,8 @@ export default function Surprise(){
   const [embedReady, setEmbedReady] = useState(false);
   const [embedFailed, setEmbedFailed] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isFs, setIsFs] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const embedWrapRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
 
   // Try to hint the external project to start directly (adds autoplay=1 and #start if missing)
   const SURPRISE_URL = (() => {
@@ -46,61 +45,71 @@ export default function Surprise(){
 
   // Attempt to load external card demo inside an iframe
   useEffect(() => {
-    const onFs = () => setIsFs(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', onFs);
     const timer = setTimeout(() => {
       if (!embedReady) setEmbedFailed(true); // likely blocked by X-Frame-Options
     }, 3500);
     return () => {
       clearTimeout(timer);
-      document.removeEventListener('fullscreenchange', onFs);
     };
   }, [embedReady]);
 
   // Fullscreen is controlled by SurpriseControls now; we keep isFs only to flip CSS class.
 
   return (
-    <main className="surprise-shell">
-      <section className="surprise-hero">
-        <h1>For You 🎉</h1>
-        <p>Enjoy a birthday card. If the live preview is blocked, a built‑in card appears below.</p>
+    <main className="mx-auto max-w-[960px] p-5 text-white">
+      {/* Header */}
+      <section className="mb-4 rounded-2xl border border-neutral-800 bg-neutral-950 px-5 py-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="m-0 text-3xl font-semibold">For You 🎉</h1>
+            <p className="m-0 mt-1 opacity-80">Enjoy a birthday card. If the live preview is blocked, a built‑in card appears below.</p>
+          </div>
+          <HeaderOpenButton href={SURPRISE_URL} />
+        </div>
       </section>
 
-      {/* Try to embed the external project output */}
-      <section id="surprise-stage" className={`surprise-embed ${isFs ? 'is-fs' : ''}`} ref={embedWrapRef}>
-            <div className="toolbar">
-              <SurpriseControls targetId="surprise-stage" openHref={SURPRISE_URL} />
-            </div>
-        <div className={`embed-frame ${loading ? 'loading' : ''}`}>
-          <iframe
-          ref={iframeRef}
-          title="Happy Birthday Card"
-          src={SURPRISE_URL}
-          onLoad={() => { setEmbedReady(true); setLoading(false); }}
-          allowFullScreen
-          sandbox="allow-scripts allow-same-origin"
-        />
-          {loading && <div className="embed-loading">Loading…</div>}
+      {/* Media Stage */}
+      <section className="mb-4 rounded-xl border border-neutral-800 bg-neutral-900 p-2">
+        <div className="relative">
+          <div id="surprise-stage" ref={stageRef} className="relative w-full overflow-hidden rounded-xl bg-black aspect-[16/9]">
+            <iframe
+              ref={iframeRef}
+              title="Happy Birthday Card"
+              src={SURPRISE_URL}
+              onLoad={() => { setEmbedReady(true); setLoading(false); }}
+              allowFullScreen
+              sandbox="allow-scripts allow-same-origin"
+              className="h-full w-full border-0"
+            />
+            {loading && (
+              <div className="absolute inset-0 grid place-items-center rounded-xl bg-neutral-950 text-neutral-400 font-semibold">Loading…</div>
+            )}
+            <StageControls targetId="surprise-stage" />
+          </div>
         </div>
         {embedFailed && (
-          <div className="blocked-note">Embed blocked by the site. Use the button above to open it in a new tab.</div>
+          <div className="mt-2 opacity-85">Embed blocked by the site. Use the button above to open it in a new tab.</div>
         )}
       </section>
 
       {/* Local fallback interactive card */}
-      <section className={`card-wrap ${opened ? 'open' : ''}`} aria-live="polite">
+      <section className="grid min-h-[60vh] place-items-center" aria-live="polite">
         {!opened && (
-          <button className="btn-primary" onClick={()=>setOpened(true)}>Open Surprise</button>
+          <button className="rounded-lg bg-red-600 px-4 py-2 font-bold text-white hover:bg-red-500 active:bg-red-700" onClick={()=>setOpened(true)}>Open Surprise</button>
         )}
-        <div className="card">
-          <div className="front">
-            <div className="ribbon">Happy Birthday</div>
-            <div className="heart">❤</div>
-          </div>
-          <div className="inside">
-            <h2>Dear Mooky,</h2>
-            <p>Wishing you a day as wonderful as you are. May your year be filled with laughter, discovery, and delightful surprises. ✨</p>
-            <p className="sig">— From Drakon & friends</p>
+        <div className="relative h-[220px] w-[320px] [perspective:1000px]">
+          <div className={`relative h-full w-full transition-transform duration-[900ms] [transform-style:preserve-3d] [transition-timing-function:cubic-bezier(.2,.8,.2,1)] ${opened ? '[transform:rotateY(180deg)]' : ''}`}>
+            {/* Front */}
+            <div className="absolute inset-0 rounded-[14px] border border-neutral-800 bg-gradient-to-b from-neutral-800 to-neutral-900 [backface-visibility:hidden]">
+              <div className="absolute left-3 top-3 rounded-full bg-red-600 px-3 py-1 font-bold">Happy Birthday</div>
+              <div className="absolute bottom-3 right-4 text-2xl opacity-90">❤</div>
+            </div>
+            {/* Inside */}
+            <div className="absolute inset-0 grid gap-2 rounded-[14px] border border-neutral-800 bg-neutral-900 p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+              <h2 className="m-0 text-xl font-semibold">Dear Mooky,</h2>
+              <p className="m-0">Wishing you a day as wonderful as you are. May your year be filled with laughter, discovery, and delightful surprises. ✨</p>
+              <p className="m-0 opacity-90">— From Drakon & friends</p>
+            </div>
           </div>
         </div>
       </section>
