@@ -6,6 +6,7 @@
 
 const { neon } = require('@neondatabase/serverless');
 const { randomUUID } = require('crypto');
+const { pusher, CHANNEL, EVENTS } = require('./_lib/pusher');
 function sanitizeDbUrl(raw) {
   if (!raw) return '';
   let s = String(raw).trim();
@@ -84,7 +85,17 @@ module.exports = async function handler(req, res) {
     const sql = neon(url);
     const id = randomUUID();
 
-    await sql`insert into wishes (id, name, message) values (${id}, ${name}, ${message})`;
+    const rows = await sql`insert into wishes (id, name, message) values (${id}, ${name}, ${message}) returning id, name, message, created_at`;
+
+    // Broadcast via Pusher if configured
+    try {
+      if (pusher) {
+        const payload = rows?.[0] || { id, name, message, created_at: new Date().toISOString() };
+        await pusher.trigger(CHANNEL, EVENTS.NEW, payload);
+      }
+    } catch (e) {
+      console.warn('[pusher] trigger failed:', e?.message || e);
+    }
 
     return send(res, 201, { ok: true, id });
   } catch (err) {

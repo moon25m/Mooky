@@ -4,6 +4,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { avatarUrl, linkifyText, MAX_LEN, sanitizeMessage, timeago, BAD_WORDS } from '../lib/wish-utils';
 import '../styles/wishes-pro.css';
 import { useWishCount } from '../hooks/useWishCount';
+import { useRealtimeWishes } from '../hooks/useRealtimeWishes';
 import { mutate as globalMutate } from 'swr';
 
 export type WishItem = { id: string; name: string; message: string; createdAt: number };
@@ -18,6 +19,7 @@ export default function Wish() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const knownIds = useRef<Set<string>>(new Set());
+  const typingTimer = useRef<any>(null);
   const remaining = MAX_LEN - message.length;
   const PINNED: WishItem = {
     id: 'pinned-drakon',
@@ -29,6 +31,26 @@ export default function Wish() {
   const hasBadWord = (s: string) => {
     try { return BAD_WORDS.some(w => new RegExp(`\\b${w}\\b`, 'i').test(s)); } catch { return false; }
   };
+
+  // Realtime via Pusher: subscribe and append incoming wishes
+  useRealtimeWishes((row) => {
+    const w: WishItem = {
+      id: String((row as any).id),
+      name: String((row as any).name || ''),
+      message: String((row as any).message || ''),
+      createdAt: new Date((row as any).created_at).getTime()
+    };
+    if (hasBadWord(w.message)) return;
+    if (knownIds.current.has(w.id)) return;
+    knownIds.current.add(w.id);
+    setWishes(prev => {
+      const next = [{ ...w, __flash: true }, ...prev].sort((a,b)=>b.createdAt - a.createdAt);
+      localStorage.setItem('mooky:wishes', JSON.stringify(next));
+      return next;
+    });
+    setTotalCount(c => c + 1);
+    setTimeout(() => setWishes(prev => prev.map(x => ({ ...x, __flash: false })) as WishWithFlash[]), 1200);
+  });
 
   // Prime from cache fast
   useEffect(() => {
@@ -233,12 +255,31 @@ export default function Wish() {
               className="msg"
               placeholder="Write your wish…"
               value={message}
-              onChange={e=>setMessage(e.target.value)}
+              onChange={e=>{
+                const v = e.target.value;
+                setMessage(v);
+                // Typing indicator via Pusher (debounced)
+                try {
+                  clearTimeout(typingTimer.current);
+                  fetch('/api/wish/typing', {
+                    method: 'POST', headers: { 'Content-Type':'application/json' },
+                    body: JSON.stringify({ name: name || 'Someone', typing: true })
+                  }).catch(()=>{});
+                  typingTimer.current = setTimeout(() => {
+                    fetch('/api/wish/typing', {
+                      method: 'POST', headers: { 'Content-Type':'application/json' },
+                      body: JSON.stringify({ name: name || 'Someone', typing: false })
+                    }).catch(()=>{});
+                  }, 1500);
+                } catch {}
+              }}
               maxLength={MAX_LEN}
               rows={3}
               aria-label="Wish message"
             />
           </div>
+          {/* Typing indicator */}
+          <TypingIndicator />
           <div className="bar">
             <span className={`counter ${remaining < 0 ? 'bad' : ''}`}>{remaining}</span>
             <button className="btn-primary" disabled={sending || message.trim().length === 0}>
@@ -282,4 +323,11 @@ export default function Wish() {
       </section>
     </main>
   );
+}
+
+// Small typing indicator bound to a separate hook instance
+function TypingIndicator(){
+  const { typing } = useRealtimeWishes();
+  if (!typing) return null;
+  return <div style={{ marginTop: 6, fontSize: 12, opacity: 0.8 }}>{typing}</div>;
 }

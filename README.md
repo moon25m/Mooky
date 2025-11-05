@@ -126,35 +126,40 @@ Deployment heartbeat: 2025-11-05 — no-op change to trigger Vercel redeploy on 
 
 ---
 
-## Wishes – Ops Notes
+## Realtime Birthday Wishes (Vercel + Neon + Pusher)
 
-Environment
-- Set `DATABASE_URL` in Vercel → Project → Settings → Environment Variables (Production).
-- Do not expose it to the client; server-only.
+- Serverless endpoints
+   - `GET /api/wish` — returns latest wishes (Cache-Control: no-store)
+   - `POST /api/wish` — inserts a wish into Neon and broadcasts via Pusher
+   - `GET /api/wish/count` — returns `{ count }` (no-store)
+   - `POST /api/wish/typing` — broadcasts typing start/stop via Pusher
+- Client
+   - Uses Server-Sent Events for low-latency list updates
+   - Uses Pusher Channels for instant broadcast plus a typing indicator
+   - SWR polling (6–8s) as fallback to keep devices consistent
 
-API endpoints
-- `GET /api/wish` (Node): returns latest 100 rows. Headers include `Cache-Control: no-store` to bypass CDN/browser caches.
-- `POST /api/wish` (Node): inserts `{ name?, message }` and returns the created row `{ id, name, message, created_at }`.
-- `GET /api/wishes/stream` (Edge): server-sent events for live updates.
-- `GET /api/wishes/debug` (Edge): connectivity + row count.
+### Environment
 
-Observability
-- Vercel → Deployments → Functions: see logs. Look for `POST /api/wish` and `GET /api/wish` entries.
-- Errors include full messages; POST logs payload length not content.
+Set these in Vercel → Project → Settings → Environment Variables:
 
-Local dev quick test
-```bash
-bash scripts/dev-test.sh
+```
+DATABASE_URL=postgres://USER:PASS@HOST/db?sslmode=require
+PUSHER_APP_ID=
+PUSHER_KEY=
+PUSHER_SECRET=
+PUSHER_CLUSTER=
+
+# Client (CRA)
+REACT_APP_PUSHER_KEY=
+REACT_APP_PUSHER_CLUSTER=
 ```
 
-Production quick test (set DEPLOY_URL or use default)
-```bash
-bash scripts/prod-test.sh
-```
+Note: If copying from Neon dashboard, paste the actual Postgres URL only (not the `psql ...` command). The app sanitizes common mistakes but correct values are best.
 
-Expected responses
-- `POST /api/wish` → `201 { ok: true, data: { id, name, message, created_at } }`
-- `GET /api/wish` → `200 { ok: true, data: [ ... ] }`
+### Verify
 
-Client behavior
-- Optimistic add on send; live SSE updates; periodic refresh every 8s and on focus; newest first.
+1) Open the Wishes page on two devices.
+2) Start typing on device A — “Someone is typing…” appears on device B.
+3) Submit a wish on A — the message appears instantly on B, the count updates; within a few seconds SWR polling confirms consistency.
+4) Hard refresh both — both list and counts match.
+
