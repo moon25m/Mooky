@@ -1,9 +1,29 @@
 import { neon } from '@neondatabase/serverless';
 
 // Edge-friendly Postgres client using Neon (DATABASE_URL required)
+function sanitizeDbUrl(raw?: string) {
+  if (!raw) return '';
+  let s = raw.trim();
+  // Strip accidental 'psql ' prefix and surrounding quotes copied from Neon UI
+  s = s.replace(/^psql\s+/, '');
+  s = s.replace(/^['"]|['"]$/g, '');
+  return s;
+}
+
 export function getDb() {
-  const url = process.env.DATABASE_URL;
+  const raw = process.env.DATABASE_URL;
+  const url = sanitizeDbUrl(raw);
   if (!url) throw new Error('DATABASE_URL is not set');
+  if (!/^postgres(ql)?:\/\//i.test(url)) {
+    throw new Error('DATABASE_URL is not a valid postgres URL');
+  }
+  // Helpful warning if user accidentally uses pooler host intended for TCP drivers
+  try {
+    const host = new URL(url).host;
+    if (/pooler\./.test(host)) {
+      console.warn('[wishes] Using pooler host in DATABASE_URL. For @neondatabase/serverless, non-pooler host also works.');
+    }
+  } catch {}
   return neon(url);
 }
 
@@ -24,7 +44,7 @@ async function ensureSchema(sql = getDb()) {
 
 export async function listWishes(sql = getDb()): Promise<Wish[]> {
   await ensureSchema(sql);
-  const rows = await sql`select id, name, message, created_at from wishes order by created_at desc limit 100` as any;
+  const rows = await sql`select id, name, message, created_at from wishes order by created_at desc` as any;
   return rows as Wish[];
 }
 

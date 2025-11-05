@@ -1,4 +1,5 @@
 import { getDb } from '../_lib/db';
+import { sanitizeDbUrl } from '../_lib/url-sanitize';
 
 export const config = { runtime: 'edge' } as const;
 
@@ -13,7 +14,7 @@ function mask(url?: string) {
 }
 
 export default async function handler(_req: Request) {
-  const url = process.env.DATABASE_URL;
+  const url = sanitizeDbUrl(process.env.DATABASE_URL);
   if (!url) {
     return json({ ok: false, error: 'DATABASE_URL is not set in Vercel environment.' }, { status: 503 });
   }
