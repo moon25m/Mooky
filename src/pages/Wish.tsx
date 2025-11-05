@@ -126,7 +126,10 @@ export default function Wish() {
           const currentIds = new Set(wishes.map(w=>w.id));
           let changed = fresh.length !== wishes.length;
           if (!changed) {
-            for (const id of incomingIds) { if (!currentIds.has(id)) { changed = true; break; } }
+            Array.from(incomingIds).some((id) => {
+              if (!currentIds.has(id)) { changed = true; return true; }
+              return false;
+            });
           }
           if (changed) {
             knownIds.current = new Set(fresh.map(w=>w.id));
