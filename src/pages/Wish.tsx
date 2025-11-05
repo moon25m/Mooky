@@ -198,7 +198,11 @@ export default function Wish() {
       <section className="wish-hero">
         <div className="wish-hero-inner">
           <h1>Birthday Wishes <span className="live-dot" aria-label="live" title="live"/></h1>
-          <p>Leave a message — it appears live on this wall. <span className="count">{totalCount + 1} wishes</span></p>
+          <p>
+            Leave a message — it appears live on this wall.
+            <span className="count">{totalCount + 1} wishes</span>
+            <span className="live-pill"><span className="live-dot" aria-label="live" title="Live"/> Live</span>
+          </p>
           <div className="surprise-cta">
             <a href="/surprise" className="btn-primary surprise-link">Surprise ✨</a>
           </div>
