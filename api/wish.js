@@ -30,6 +30,20 @@ async function readRawBody(req) {
 }
 
 module.exports = async function handler(req, res) {
+  if (req.method === 'GET') {
+    try {
+      const url = sanitizeDbUrl(process.env.DATABASE_URL);
+      if (!url || !/^postgres(ql)?:\/\//i.test(url)) {
+        return send(res, 503, { ok: false, error: 'DATABASE_URL not configured' });
+      }
+      const sql = neon(url);
+      const rows = await sql`select id, name, message, created_at from wishes order by created_at desc`;
+      res.setHeader('cache-control', 'no-store, no-cache, must-revalidate');
+      return send(res, 200, { wishes: rows });
+    } catch (err) {
+      return send(res, 500, { ok: false, error: err?.message || 'failed' });
+    }
+  }
   if (req.method !== 'POST') {
     return send(res, 405, { ok: false, error: 'Method not allowed' });
   }

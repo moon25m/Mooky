@@ -3,6 +3,8 @@ import confetti from 'canvas-confetti';
 import toast, { Toaster } from 'react-hot-toast';
 import { avatarUrl, linkifyText, MAX_LEN, sanitizeMessage, timeago, BAD_WORDS } from '../lib/wish-utils';
 import '../styles/wishes-pro.css';
+import { useWishCount } from '../hooks/useWishCount';
+import { mutate as globalMutate } from 'swr';
 
 export type WishItem = { id: string; name: string; message: string; createdAt: number };
 type WishWithFlash = WishItem & { __flash?: boolean };
@@ -10,6 +12,7 @@ type WishWithFlash = WishItem & { __flash?: boolean };
 export default function Wish() {
   const [wishes, setWishes] = useState<WishWithFlash[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
+  const { data: swrCount } = useWishCount();
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -181,7 +184,10 @@ export default function Wish() {
       setTotalCount(c => c + 1);
       setTimeout(() => setWishes(prev => prev.map(x => ({ ...x, __flash: false })) as WishWithFlash[]), 1200);
       setMessage('');
-      toast.success('Wish sent!');
+  // Trigger SWR revalidation across devices
+  globalMutate('/api/wish');
+  globalMutate('/api/wish/count');
+  toast.success('Wish sent!');
       confetti({ particleCount: 90, spread: 65, origin: { y: 0.25 } });
     } catch (err) {
   toast.error((err as Error)?.message || 'Could not send your wish. Try again.');
@@ -200,7 +206,7 @@ export default function Wish() {
           <h1>Birthday Wishes <span className="live-dot" aria-label="live" title="live"/></h1>
           <p>
             Leave a message — it appears live on this wall.
-            <span className="count">{totalCount + 1} wishes</span>
+            <span className="count">{(typeof (swrCount as any)?.count === 'number' ? (swrCount as any).count : totalCount) + 1} wishes</span>
             <span className="live-pill"><span className="live-dot" aria-label="live" title="Live"/> Live</span>
           </p>
           <div className="surprise-cta">
