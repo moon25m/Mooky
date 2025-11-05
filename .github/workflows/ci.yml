@@ -1,37 +1,38 @@
+
 name: CI
 
 on:
-	push:
-		branches: [ main ]
-	pull_request:
-		branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-	build:
-		name: Build and Test
-		runs-on: ubuntu-latest
-		steps:
-			- name: Checkout
-				uses: actions/checkout@v4
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-			- name: Use Node.js
-				uses: actions/setup-node@v4
-				with:
-					node-version: '18'
-					cache: 'npm'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
 
-			- name: Install dependencies
-				run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-			- name: Run TypeScript typecheck
-				run: npx tsc --noEmit
+      - name: Run TypeScript typecheck
+        run: npx tsc --noEmit
 
-			- name: Run lint (eslint)
-				run: npx eslint --ext .js,.jsx,.ts,.tsx . || true
+      - name: Run lint (eslint)
+        run: npx eslint --ext .js,.jsx,.ts,.tsx . || true
 
-			- name: Build
-				run: npm run build --if-present
+      - name: Build
+        run: npm run build --if-present
 
-			- name: Run tests
-				run: npm test --if-present -- --watchAll=false
+      - name: Run tests
+        run: npm test --if-present -- --watchAll=false
 
