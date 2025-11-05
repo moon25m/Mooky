@@ -1,102 +1,46 @@
-.continue-watching-row {
-  padding: 20px;
-  color: #fff;
-}
+/* Adopt Netflix-style rail from section 1, simplified */
+.continue-watching-row { margin: 14px 0 24px; padding: 0 3vw; position: relative; color: #fff; }
+.continue-watching-row .row-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.continue-watching-row .row-title { font-size: 1.35rem; font-weight: 800; margin: 0 0 8px; }
+.continue-watching-row .row-nav { display: flex; gap: 6px; }
+.continue-watching-row .rail-nav { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(0,0,0,0.35); color: #fff; cursor: pointer; }
+.continue-watching-row .rail-nav:hover { background: rgba(0,0,0,0.55); }
+.continue-watching-row .rail-nav svg { width: 16px; height: 16px; }
 
-.continue-watching-row:hover {
- cursor: pointer;
-}
+/* Subtitle */
+.continue-watching-row .row-subtitle { margin: 0 0 12px 0; color: #b3b3b3; font-size: 0.95rem; line-height: 1.4; opacity: 0; transform: translateY(-6px); animation: subtitleIn 600ms ease 180ms forwards; }
+@keyframes subtitleIn { from { opacity: 0; transform: translateY(-6px);} to { opacity: 1; transform: translateY(0);} }
 
-.row-title {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
+/* Scroller */
+.continue-watching-row .card-row { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 0 14px; }
+.continue-watching-row .card-row::-webkit-scrollbar { display: none; }
+.continue-watching-row .card-row { scrollbar-width: none; }
 
-/* Scoped subtitle styling */
-.continue-watching-row .row-subtitle {
-  margin: 0 0 12px 0;
-  color: #b3b3b3;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  opacity: 0;
-  transform: translateY(-6px);
-  animation: subtitleIn 600ms ease 180ms forwards;
-}
+/* Cards — slightly lighter hover than section 1 */
+.continue-watching-row .pick-card { position: relative; flex: 0 0 auto; width: clamp(200px, 28vw, 320px); scroll-snap-align: start; }
+.continue-watching-row .rail-card-media { position: relative; border-radius: 8px; overflow: hidden; background: #111; transform: translateZ(0); transition: transform 160ms ease, box-shadow 160ms ease; }
+.continue-watching-row .rail-card-media img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.continue-watching-row .rail-card-bottom { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%); padding: 10px; }
+.continue-watching-row .rail-card-media:hover { transform: scale(1.025); box-shadow: 0 6px 22px rgba(229,9,20,0.12); }
+.continue-watching-row .pick-image { transition: transform 160ms ease; }
+.continue-watching-row .rail-card-media:hover .pick-image { transform: scale(1.04); }
+.continue-watching-row .pick-label { color: #fff; font-weight: 800; font-size: 0.95rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-@keyframes subtitleIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* Hover overlay like section 1 */
+.continue-watching-row .rail-card-hover { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(0,0,0,0.35); opacity: 0; transition: opacity 180ms ease; }
+.continue-watching-row .rail-card-media:hover .rail-card-hover { opacity: 1; }
+.continue-watching-row .hover-pill { display: inline-block; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-weight: 700; font-size: 0.85rem; padding: 6px 10px; border-radius: 999px; }
 
-/* Galaxy-specific hover color palette for poetic titles */
-.continue-watching-row.galaxy .card-row .pick-card:nth-child(1):hover .pick-label { color: #2fd3c7; } /* Echo */
-.continue-watching-row.galaxy .card-row .pick-card:nth-child(2):hover .pick-label { color: #7ab8ff; } /* Fade */
-.continue-watching-row.galaxy .card-row .pick-card:nth-child(3):hover .pick-label { color: #c6a8ff; } /* Whisper */
-.continue-watching-row.galaxy .card-row .pick-card:nth-child(4):hover .pick-label { color: #a8ff60; } /* Glow */
+/* Galaxy accent hover colors (kept) */
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(1):hover .pick-label { color: #2fd3c7; }
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(2):hover .pick-label { color: #7ab8ff; }
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(3):hover .pick-label { color: #c6a8ff; }
+.continue-watching-row.galaxy .card-row .pick-card:nth-child(4):hover .pick-label { color: #a8ff60; }
 
-/* Matching glow tint on hover */
-.continue-watching-row.galaxy .card-row .pick-card:nth-child(1):hover { box-shadow: 0 8px 20px rgba(47, 211, 199, 0.45); }
-.continue-watching-row.galaxy .card-row .pick-card:nth-child(2):hover { box-shadow: 0 8px 20px rgba(122, 184, 255, 0.45); }
-.continue-watching-row.galaxy .card-row .pick-card:nth-child(3):hover { box-shadow: 0 8px 20px rgba(198, 168, 255, 0.45); }
-.continue-watching-row.galaxy .card-row .pick-card:nth-child(4):hover { box-shadow: 0 8px 20px rgba(168, 255, 96, 0.45); }
+/* Edge fade mask */
+.continue-watching-row .rail-mask { pointer-events: none; position: absolute; inset: 0; background: linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 8%, rgba(0,0,0,0) 92%, #000 100%); opacity: 0.8; }
 
-.card-row {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-  scrollbar-width: none; /* For Firefox */
-}
-
-.card-row::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari, and Edge */
-}
-
-.pick-card {
-  position: relative;
-  min-width: 150px;
-  flex: 0 0 auto;
-  border-radius: 5px;
-  overflow: hidden;
-  transition: transform 0.3s ease;
-}
-
-.pick-card:hover {
-  transform: scale(1.05); /* Slight zoom effect on hover */
-}
-
-.pick-image {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Blackish overlay */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.pick-card:hover .overlay {
-  opacity: 1;
-}
-
-.pick-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-size: 1rem;
-  font-weight: bold;
-  text-align: center;
+@media (max-width: 768px) {
+  .continue-watching-row .row-title { font-size: 1.15rem; }
+  .continue-watching-row .pick-card { width: clamp(160px, 52vw, 240px); }
 }

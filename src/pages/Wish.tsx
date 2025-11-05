@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import toast, { Toaster } from 'react-hot-toast';
 import { avatarUrl, linkifyText, MAX_LEN, sanitizeMessage, timeago, BAD_WORDS } from '../lib/wish-utils';
@@ -30,28 +30,9 @@ export default function Wish() {
     createdAt: Date.now()
   };
 
-  const hasBadWord = useCallback((s: string) => {
+  const hasBadWord = (s: string) => {
     try { return BAD_WORDS.some(w => new RegExp(`\\b${w}\\b`, 'i').test(s)); } catch { return false; }
-  }, []);
-
-  // Normalizers (stable identities for useEffect deps)
-  const normalizeWish = useCallback((w: any): WishItem => {
-    const created = (w && (w.createdAt ?? w.created_at)) as any;
-    let ts: number;
-    if (typeof created === 'number') ts = created;
-    else if (typeof created === 'string') ts = new Date(created).getTime();
-    else ts = Date.now();
-    return {
-      id: String(w.id),
-      name: String(w.name || ''),
-      message: String(w.message || ''),
-      createdAt: ts
-    };
-  }, []);
-
-  const normalizeList = useCallback((arr: any[]): WishItem[] => {
-    return (Array.isArray(arr) ? arr : []).map(normalizeWish);
-  }, [normalizeWish]);
+  };
 
   // Realtime via Pusher: subscribe and append incoming wishes
   const { typing, presence } = useRealtimeWishes((row) => {
@@ -74,6 +55,7 @@ export default function Wish() {
   });
 
   // Prime from cache fast
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     try {
       const cached = JSON.parse(localStorage.getItem('mooky:wishes') || '[]') as WishItem[];
@@ -86,6 +68,7 @@ export default function Wish() {
   }, []);
 
   // SWR polling fallback: if SSE/Pusher are unavailable, reconcile with /api/wish list periodically
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     try {
       const incoming = normalizeList((swrList as any)?.wishes || [])
@@ -102,14 +85,29 @@ export default function Wish() {
       });
       setTotalCount(c => Math.max(c, incoming.length));
     } catch {}
-  }, [swrList, normalizeList, hasBadWord]);
+  }, [swrList]);
 
   // Normalize server wish objects (supports snake_case created_at or camelCase createdAt)
-  
+  function normalizeWish(w: any): WishItem {
+    const created = (w && (w.createdAt ?? w.created_at)) as any;
+    let ts: number;
+    if (typeof created === 'number') ts = created;
+    else if (typeof created === 'string') ts = new Date(created).getTime();
+    else ts = Date.now();
+    return {
+      id: String(w.id),
+      name: String(w.name || ''),
+      message: String(w.message || ''),
+      createdAt: ts
+    };
+  }
 
-  
+  function normalizeList(arr: any[]): WishItem[] {
+    return (Array.isArray(arr) ? arr : []).map(normalizeWish);
+  }
 
   // Initial snapshot via REST (authoritative) with robust fallback
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     (async () => {
       let list: WishItem[] = [];
@@ -167,9 +165,10 @@ export default function Wish() {
       localStorage.setItem('mooky:wishes', JSON.stringify(list));
       setLoading(false);
     })();
-  }, [normalizeList, hasBadWord]);
+  }, []);
 
   // SSE live updates + highlight
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const es = new EventSource('/api/wishes/stream');
     es.onmessage = (e) => {
@@ -210,7 +209,7 @@ export default function Wish() {
     };
     es.onerror = () => es.close();
     return () => es.close();
-  }, [normalizeList, normalizeWish, hasBadWord]);
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

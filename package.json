@@ -36,7 +36,6 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "preinstall": "node -e \"try{require('fs').unlinkSync('package-lock.json')}catch(e){}\"",
     "start": "react-scripts start",
     "server": "node server/index.js",
   "dev": "concurrently -k -n app,api -c green,cyan \"cross-env PORT=3002 GENERATE_SOURCEMAP=false npm start\" \"npm run server\"",
@@ -44,7 +43,6 @@
     "share:cf": "concurrently -k -n server,tunnel -c green,cyan \"npm run start:prod\" \"cloudflared tunnel --url http://localhost:4001\"",
     "share:lt": "concurrently -k -n server,tunnel -c green,cyan \"npm run start:prod\" \"npx -y localtunnel --port 4001\"",
     "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
-    "postinstall": "npx --yes update-browserslist-db@latest",
     "seed:wishes": "node scripts/seed-wishes.js",
     "import:wishes": "node scripts/post-import.js",
     "test": "react-scripts test",

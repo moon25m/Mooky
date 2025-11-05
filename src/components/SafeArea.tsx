@@ -1,1 +1,2 @@
-export { default } from './layout/SafeArea';
+// Legacy stub (unused) to satisfy isolatedModules.
+export {};

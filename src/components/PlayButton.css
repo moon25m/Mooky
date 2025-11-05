@@ -1,20 +1,17 @@
 .play-button {
   display: inline-flex;
   align-items: center;
-  padding: 10px 20px;
-  background-color: #E50914; 
-  color: #fff;
-  font-weight: bold;
+  padding: 10px 18px;
+  background-color: #ffffff; /* Netflix Play is white */
+  color: #000;
+  font-weight: 800;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: transform 160ms ease, filter 160ms ease;
+  transition: transform 160ms ease, filter 160ms ease, background-color 160ms ease;
 }
 
-.play-button:hover {
-  transform: translateY(-1px) scale(1.02);
-  filter: brightness(1.05);
-}
+.play-button:hover { transform: translateY(-1px) scale(1.02); filter: brightness(0.98); }
 
 .icon-container {
   display: flex;
@@ -26,7 +23,4 @@
   width: 1rem;
 }
 
-.label {
-  font-size: 1rem;
-  color: white;
-}
+.label { font-size: 1rem; color: #000; }

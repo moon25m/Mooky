@@ -15,12 +15,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const hideNavbar = location.pathname === '/surprise';
   const showHomeFab = location.pathname === '/surprise';
+  // Do not offset content on hero-style pages so the hero can sit beneath a transparent navbar
+  const isHeroRoute = location.pathname.startsWith('/profile');
   return (
     <div>
       {!hideNavbar && <Navbar />}
       <SafeArea>
         {/* Offset for fixed navbar when visible; minimal on Surprise */}
-        <div className={!hideNavbar ? 'pt-20' : ''}>
+        <div className={!hideNavbar ? (isHeroRoute ? '' : 'pt-20') : ''}>
           {children}
         </div>
       </SafeArea>

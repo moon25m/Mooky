@@ -1,14 +1,15 @@
 .top-picks-row {
-  margin: 20px 0;
-  padding: 10px 20px
+  margin: 10px 0 22px;
+  padding: 0 3vw;
+  position: relative;
 }
 
-.row-title {
-  font-size: 2rem;
-  color: #fff;
-  margin-bottom: 20px;
-  animation: fadeIn 1s ease-in-out;
-}
+.row-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.row-title { font-size: 1.35rem; font-weight: 800; color: #fff; margin: 0 0 8px; animation: fadeIn 760ms ease-in-out; }
+.row-nav { display: flex; gap: 6px; }
+.rail-nav { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(0,0,0,0.45); color: #fff; cursor: pointer; }
+.rail-nav:hover { background: rgba(0,0,0,0.65); }
+.rail-nav svg { width: 16px; height: 16px; }
 
 /* Scoped subtitle under the section title */
 .top-picks-row .row-subtitle {
@@ -40,26 +41,18 @@
 .top-picks-row.galaxy .card-row .pick-card:nth-child(4):hover { box-shadow: 0 8px 20px rgba(255, 159, 67, 0.45); }
 .top-picks-row.galaxy .card-row .pick-card:nth-child(5):hover { box-shadow: 0 8px 20px rgba(179, 136, 255, 0.45); }
 
-.card-row {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap; /* wrap on small screens to avoid horizontal overflow */
-  justify-content: center;
-}
+.card-row { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 0 14px; }
+.card-row::-webkit-scrollbar { display: none; }
+.card-row { scrollbar-width: none; }
 
-.pick-card {
-  position: relative;
-  width: clamp(140px, 44vw, 250px);
-  height: clamp(100px, 35vw, 200px);
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  animation: slideIn 0.5s ease forwards;
-  /* stagger via data attribute if provided */
-  animation-delay: calc(var(--i, 0) * 0.2s);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
+.pick-card { position: relative; flex: 0 0 auto; width: clamp(200px, 28vw, 320px); scroll-snap-align: start; }
+.rail-card-media { position: relative; border-radius: 8px; overflow: hidden; background: #111; transform: translateZ(0); transition: transform 200ms ease, box-shadow 200ms ease; }
+.rail-card-media img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.rail-card-bottom { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%); padding: 10px; }
+.rail-card-hover { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(0,0,0,0.35); opacity: 0; transition: opacity 180ms ease; }
+.rail-card-media:hover { transform: scale(1.04); box-shadow: 0 6px 26px rgba(229,9,20,0.18); }
+.rail-card-media:hover .rail-card-hover { opacity: 1; }
+.hover-pill { display: inline-block; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-weight: 700; font-size: 0.85rem; padding: 6px 10px; border-radius: 999px; }
 
 /* map data-i to CSS variable for animation delay without inline styles */
 .pick-card[data-i="0"] { --i: 0; }
@@ -73,51 +66,17 @@
 .pick-card[data-i="8"] { --i: 8; }
 .pick-card[data-i="9"] { --i: 9; }
 
-.pick-card:hover {
-  transform: scale(1.05);
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(255, 0, 0, 0.5); /* Netflix red glow on hover */
-}
+/* keep a faint red glow for galaxy theme only via existing nth-child rules */
 
-.pick-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
+.pick-image { transition: transform 200ms ease; }
 
-.pick-card:hover .pick-image {
-  transform: scale(1.1);
-}
+.rail-card-media:hover .pick-image { transform: scale(1.06); }
 
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
+/* overlay handled via rail-card-bottom and rail-card-hover */
 
-.pick-card:hover .overlay {
-  opacity: 1;
-}
+.pick-label { color: #fff; font-weight: 800; font-size: 0.95rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-.pick-label {
-  color: #fff;
-  font-size: 1.2rem;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.pick-label:hover {
- color: rgb(153, 80, 80);
-}
+.pick-label:hover { color: #fff; }
 
 /* Animations */
 @keyframes fadeIn {
@@ -140,4 +99,12 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* Edge fade mask for scroll rails */
+.rail-mask { pointer-events: none; position: absolute; inset: 0; background: linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 8%, rgba(0,0,0,0) 92%, #000 100%); opacity: 0.8; border-radius: 0; }
+
+@media (max-width: 768px) {
+  .row-title { font-size: 1.15rem; }
+  .pick-card { width: clamp(160px, 52vw, 240px); }
 }

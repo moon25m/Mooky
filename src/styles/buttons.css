@@ -1,0 +1,45 @@
+/* Netflix-style CTA buttons */
+.cta {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 4px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 12px 20px;
+  transition: transform 150ms ease, filter 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+  text-decoration: none;
+}
+
+.cta:focus-visible {
+  outline: 2px solid rgba(229,9,20,0.9);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(229,9,20,0.35);
+}
+
+/* Primary: Netflix red with white text */
+.cta.primary {
+  background: #e50914;
+  color: #fff;
+}
+.cta.primary:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.cta.primary:active { filter: brightness(0.96); transform: translateY(0); }
+
+/* Secondary: dark translucent plate with hairline border */
+.cta.secondary {
+  background: rgba(109,109,110,0.7);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.cta.secondary:hover { filter: brightness(1.08); }
+.cta.secondary:active { filter: brightness(0.95); }
+
+.cta-icon { display: inline-flex; align-items: center; }
+.cta-label { white-space: nowrap; }

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ProfileBanner.css';
-import PlayButton from '../components/PlayButton';
-import MoreInfoButton from '../components/MoreInfoButton';
+import CTAButton from '../components/CTAButton';
+import Hero from '../components/Hero';
 import { getProfileBanner } from '../queries/getProfileBanner';
 import { ProfileBanner as ProfileBannerType } from '../types';
 import BirthdayCountdown from '../components/BirthdayCountdown.jsx';
@@ -11,7 +11,9 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
-const ProfileBanner: React.FC = () => {
+type BannerProps = { backgroundImage?: string };
+
+const ProfileBanner: React.FC<BannerProps> = ({ backgroundImage }) => {
   const navigate = useNavigate();
 
 
@@ -84,19 +86,35 @@ const ProfileBanner: React.FC = () => {
 
   return (
     <div className="profile-banner billboard-enter hero-container">
-      {/* Cinematic overlays */}
-      <div className="banner-overlay-gradient" aria-hidden="true"></div>
-      <div className="banner-overlay-redglow" aria-hidden="true"></div>
+      <Hero backgroundImage={backgroundImage}>
+  <div className="banner-content">
+        {/* Brand row like Netflix (N SERIES) */}
+        <div className="nf-brand" aria-label="Brand">
+          <span className="nf-n">M</span>
+          <span className="nf-series">SERIES</span>
+        </div>
 
-      {/* Netflix-style maturity badge (bottom-right of the whole billboard) */}
-      <div id="maturity-badge" className="maturity-badge" aria-label="Age rating">{maturityLabel}</div>
-
-      <div className="banner-content">
         <h1 className="hero-title" id='headline'>
           ORBIT (2025)
           <br />
           <span className="subtitle">A Story That Never Reached Its Star</span>
         </h1>
+
+        {/* Topline row like Netflix (TOP 10 #1 Today) */}
+        <div className="nf-topline">
+          <span className="nf-top10-badge" aria-hidden="true">
+            <span className="t">TOP</span>
+            <span className="n">10</span>
+          </span>
+          <span className="nf-top10-text"><strong>#1</strong> in TV Shows Today</span>
+        </div>
+
+        {/* Optional chips row for metadata */}
+        <div className="nf-chips" role="list">
+          <span className="chip" role="listitem">New</span>
+          <span className="chip" role="listitem">2025</span>
+          <span className="chip" role="listitem">Feature</span>
+        </div>
 
         <div className="birthday-countdown-wrapper">
           <BDayCountdown
@@ -118,11 +136,13 @@ const ProfileBanner: React.FC = () => {
   <p className="banner-tagline">"Inspired by the moments that never happened."</p>
 
         <div className="banner-buttons">
-          <PlayButton onClick={handlePlayClick} label="Play" />
-          <MoreInfoButton onClick={handleLinkedinClick} label="Quiet Note" />
+          <CTAButton variant="primary" icon="play" label="Play" onClick={handlePlayClick} />
+          <CTAButton variant="secondary" icon="info" label="Quiet Note" onClick={handleLinkedinClick} />
         </div>
-
-      </div>
+  </div>
+  </Hero>
+  {/* Netflix-style maturity badge (bottom-right of the whole billboard) */}
+  <div id="maturity-badge" className="maturity-badge" aria-label="Age rating">{maturityLabel}</div>
 
       {isStreaming && (
         <div className="now-streaming-overlay" role="status" aria-live="assertive">

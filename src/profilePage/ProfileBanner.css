@@ -1,16 +1,15 @@
 .profile-banner {
   display: flex;
   align-items: flex-end;
-  justify-content: left;
+  justify-content: flex-start;
   background-size: cover;
   background-position: center;
   color: #fff;
   position: relative;
-  padding-bottom: 0;
   width: 100%;
-  height: 100%;
+  min-height: min(82svh, 780px); /* more cinematic billboard height */
   overflow: hidden;
-  padding: 40px 20px 20px 20px;
+  padding: 0; /* use inner content padding for consistent edges */
 }
 
 /* Cinematic fade-in */
@@ -21,7 +20,12 @@
 .banner-overlay-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.6) 100%);
+  /* lighter top/bottom vignette for a more authentic Netflix feel */
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0.28) 0%,
+    rgba(0,0,0,0.02) 42%,
+    rgba(0,0,0,0.26) 100%
+  );
   pointer-events: none;
 }
 
@@ -31,20 +35,60 @@
   inset: -20% -10% 0 -10%;
   background: radial-gradient(60% 50% at 30% 30%, rgba(229,9,20,0.18), rgba(229,9,20,0) 60%);
   filter: blur(30px);
-  opacity: 0.7;
+  /* soften the red glow a touch so the background reads clearer */
+  opacity: 0.28;
   pointer-events: none;
+}
+
+/* Stronger left-side shading to match Netflix readability */
+.banner-overlay-leftshade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.78) 0%,
+    rgba(0,0,0,0.48) 28%,
+    rgba(0,0,0,0.24) 48%,
+    rgba(0,0,0,0.12) 66%,
+    rgba(0,0,0,0.04) 82%,
+    rgba(0,0,0,0) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Radial vignette focused around the copy column */
+.banner-overlay-vignette {
+  position: absolute;
+  inset: -12% -10% -6% -10%;
+  background: radial-gradient(80% 60% at 22% 40%,
+    rgba(0,0,0,0.38) 0%,
+    rgba(0,0,0,0.26) 28%,
+    rgba(0,0,0,0.12) 58%,
+    rgba(0,0,0,0.0) 100%
+  );
+  filter: blur(2px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* subtle film grain like Netflix */
+.hero-container::before {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%222%22 stitchTiles=%22stitch%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.035%22/></svg>');
+  pointer-events: none;
+  z-index: 0;
 }
 
 .banner-content {
   position: relative;
   /* Netflix billboards keep the copy column relatively narrow */
-  max-width: min(44vw, 980px);
-  font-weight: bold;
+  max-width: min(46vw, 980px);
   width: 100%;
-  padding: 50px 0px;
   box-sizing: border-box;
-  padding-top: 10px;
-  font-weight: bold;
+  padding: 10vh 3vw 9vh; /* closer to the corner like the reference */
+  margin-left: clamp(8px, 3vw, 48px);
 }
 
 .banner-headline {
@@ -56,13 +100,13 @@
 .hero-title {
   font-family: 'Netflix Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 900;
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-size: clamp(3rem, 6vw, 5.2rem);
   letter-spacing: 0.02em;
   color: #fff;
   text-transform: uppercase;
   line-height: 1.06; /* slightly tighter */
   text-shadow: 0 4px 14px rgba(0,0,0,0.7);
-  margin: 0 0 0.35rem 0; /* reduce space under H1 */
+  margin: 0 0 0.2rem 0; /* reduce space under H1 */
   animation: fadeInTitle 1.2s ease-out;
 }
 
@@ -72,12 +116,12 @@
 }
 
 .subtitle {
-  font-weight: 500;
+  font-weight: 500; /* a touch lighter to match Netflix */
   font-size: clamp(1rem, 2vw, 1.25rem);
-  color: rgba(255,255,255,0.9);
-  text-transform: none;
-  letter-spacing: 0;
-  margin-top: 0.25rem; /* tuck closer to title */
+  color: rgba(255,255,255,0.92);
+  text-transform: none; /* sentence/title case */
+  letter-spacing: 0.05px;
+  margin-top: 0.25rem;
 }
 
 /* Netflix-style title hover glow */
@@ -87,13 +131,16 @@
 
 .banner-description {
   font-size: 1rem;
-  margin-bottom: 8px;
-  font-size: 14px;
+  line-height: 1.55;
+  margin: 6px 0 12px 0;
+  max-width: 58ch; /* keep readable column */
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6);
 }
 
 .banner-description p { margin: 0 0 8px 0; }
 
-.banner-description--italic p { font-style: italic; }
+/* Netflix uses normal body copy for the logline; keep text but remove italics */
+.banner-description--italic p { font-style: normal; }
 
 .banner-tagline {
   color: #b3b3b3;
@@ -103,7 +150,7 @@
 }
 
 .birthday-countdown-wrapper {
-  margin: 10px 0 14px 0;
+  margin: 8px 0 12px 0;
 }
 
 .birthday-countdown__label {
@@ -157,13 +204,8 @@
   transition: background-color 0.3s ease;
 }
 
-.play-button {
-  background-color: #e50914;
-}
-
-.info-button {
-  background-color: rgba(109, 109, 110, 0.7);
-}
+.play-button { background-color: #e50914; }
+.info-button { background-color: rgba(109,109,110,0.7); }
 
 .banner-button:hover {
   background-color: #b81d24;
@@ -198,38 +240,12 @@
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .banner-content {
-    max-width: 100%; /* full width on mobile */
-    text-align: center;
-  }
-  .profile-banner {
-    padding: 60px 20px;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .banner-headline {
-    font-size: 2rem;
-    margin-top: 10rem;
-  }
-
-  .banner-description {
-    line-height: 1.5;
-    font-size: 12px;
-  }
-
-  /* Button adjustments */
-  .banner-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .banner-button {
-    width: auto;
-    padding: 10px 15px;
-    font-size: 0.9rem;
-  }
+  .banner-content { max-width: 100%; text-align: left; padding: 14vh 4vw 9vh; margin-left: 0; }
+  .profile-banner { align-items: center; justify-content: flex-start; }
+  .hero-title { font-size: clamp(2.2rem, 8vw, 3rem); }
+  .banner-description { font-size: 0.95rem; }
+  .banner-buttons { flex-direction: row; gap: 8px; }
+  .banner-button { padding: 10px 15px; font-size: 0.95rem; }
 }
 
 /* Landscape phones/tablets with very short height: tighten layout */
@@ -296,12 +312,35 @@
 
 /* Rightward gradient overlay for cinematic focus */
 .hero-container::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, rgba(0,0,0,0.7) 20%, rgba(0,0,0,0.4) 100%);
-  z-index: 1;
+  /* Rightward curtain handled by Hero; disable this duplicate overlay */
+  content: none;
 }
 
 .banner-content { position: relative; z-index: 2; }
+
+/* --- Netflix brand row (N SERIES) --- */
+.nf-brand { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 8px 0; letter-spacing: 0.18em; text-transform: uppercase; font-size: 0.85rem; color: #b3b3b3; font-weight: 800; font-variant-caps: all-small-caps; }
+.nf-brand .nf-n { color: #e50914; font-weight: 900; font-size: 0.95rem; line-height: 1; }
+.nf-brand .nf-series { opacity: 0.95; }
+
+/* --- Topline row (TOP 10 #1 Today) --- */
+.nf-topline { display: flex; align-items: center; gap: 8px; margin: 4px 0 8px 0; }
+.nf-top10-badge { width: 28px; height: 28px; border-radius: 4px; background: #e50914; color: #fff; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.35); }
+.nf-top10-badge .t { font-size: 9px; font-weight: 900; line-height: 1; margin-top: 1px; }
+.nf-top10-badge .n { font-size: 13px; font-weight: 900; line-height: 1; margin-top: -2px; }
+.nf-top10-text { font-weight: 700; color: #fff; }
+.nf-topline .nf-top10-text strong { font-weight: 900; }
+
+/* Chips row: simple separators like Netflix */
+.nf-chips { display: flex; align-items: center; gap: 10px; color: #b3b3b3; font-size: 0.98rem; margin: 0 0 8px 0; }
+.nf-chips .chip { position: relative; }
+.nf-chips .chip + .chip { padding-left: 14px; }
+.nf-chips .chip + .chip::before { content: "•"; position: absolute; left: 4px; top: 0; color: #b3b3b3; }
+
+@media (max-width: 768px) {
+  .nf-brand { font-size: 0.8rem; }
+  .nf-top10-badge { width: 26px; height: 26px; }
+  .nf-top10-badge .t { font-size: 8px; }
+  .nf-top10-badge .n { font-size: 12px; }
+}
 
