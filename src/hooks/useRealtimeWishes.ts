@@ -30,7 +30,7 @@ export function useRealtimeWishes(onNewWish?: (w: WishRow) => void) {
     });
 
     return () => {
-      try { pusherClient.unsubscribe(CHANNEL); } catch {}
+      try { pusherClient?.unsubscribe?.(CHANNEL); } catch {}
       clearTimeout(timer.current);
     };
   }, [onNewWish]);
