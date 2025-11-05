@@ -22,23 +22,18 @@
 .btn-primary:disabled{opacity:.6; cursor:not-allowed}
 
 .feed{display:grid; gap:12px}
-.wish-card{display:flex; gap:12px; align-items:flex-start; background:#141414; border:1px solid #222; border-radius:14px; padding:12px; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; overflow:visible}
+.wish-card{display:flex; gap:12px; align-items:flex-start; background:#141414; border:1px solid #222; border-radius:14px; padding:12px; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease}
 .wish-card:hover{transform:translateY(-1px); box-shadow:0 10px 22px rgba(0,0,0,.35); border-color:#2d2d2d}
 .wish-card.flash{box-shadow:0 0 0 3px rgba(229,9,20,.35); animation: fadeRing 1.2s ease forwards}
 .wish-card.pinned{border-color:#2b2b2b;background:linear-gradient(0deg, rgba(229,9,20,.06), rgba(229,9,20,.02)), #141414}
 .pill{font-size:.75rem;background:#e50914;color:#fff;border-radius:999px;padding:2px 6px;margin-left:auto}
 @keyframes fadeRing { from { box-shadow:0 0 0 3px rgba(229,9,20,.35) } to { box-shadow:none } }
 .avatar{width:40px;height:40px;border-radius:50%;flex:none;border:1px solid #2b2b2b;background:#0f0f0f}
-.content{display:grid; gap:4px; min-width:0}
+.content{display:grid; gap:4px}
 .meta{display:flex; align-items:center; gap:10px; opacity:.9}
 .meta .who{font-weight:700}
 .meta time{font-size:.9rem; opacity:.75}
-.text{line-height:1.45; white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word}
-
-/* Show more / collapsible message */
-.wish-message.clamped{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
-.show-more-button{background:transparent;border:0;color:#9ad1ff;cursor:pointer;padding:6px 0;margin-top:6px;font-weight:700}
-.show-more-button:focus{outline:2px solid rgba(154,209,255,0.14);outline-offset:2px;border-radius:4px}
+.text{line-height:1.45}
 .text a{color:#9ad1ff; text-decoration:underline}
 
 .skeleton,.empty{background:#141414;border:1px solid #222;border-radius:14px;padding:18px;text-align:center;opacity:.85}

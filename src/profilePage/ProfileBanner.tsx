@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ProfileBanner.css';
 import CTAButton from '../components/CTAButton';
+import QuietNoteModal from '../components/QuietNoteModal';
+import { useLocation } from 'react-router-dom';
 import Hero from '../components/Hero';
 import { getProfileBanner } from '../queries/getProfileBanner';
 import { ProfileBanner as ProfileBannerType } from '../types';
@@ -20,6 +22,9 @@ const ProfileBanner: React.FC<BannerProps> = ({ backgroundImage }) => {
   const [bannerData, setBannerData] = useState<ProfileBannerType | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [maturityLabel, setMaturityLabel] = useState<string>('TV-22');
+  const location = useLocation();
+  const isGalaxy = location.pathname && location.pathname.includes('/profile/galaxy');
+  const [qnOpen, setQnOpen] = useState(false);
 
   // configure dayjs tz locally for this module
   dayjs.extend(utc);
@@ -74,6 +79,7 @@ const ProfileBanner: React.FC<BannerProps> = ({ backgroundImage }) => {
   const handleLinkedinClick = () => { 
     window.open(bannerData.linkedinLink, '_blank');
   }
+
 
   const handleCountdownReached = () => {
     try {
@@ -137,7 +143,12 @@ const ProfileBanner: React.FC<BannerProps> = ({ backgroundImage }) => {
 
         <div className="banner-buttons">
           <CTAButton variant="primary" icon="play" label="Play" onClick={handlePlayClick} />
-          <CTAButton variant="secondary" icon="info" label="Quiet Note" onClick={handleLinkedinClick} />
+          <CTAButton
+            variant="secondary"
+            icon="info"
+            label="Quiet Note"
+            onClick={() => { if (isGalaxy) setQnOpen(true); else handleLinkedinClick(); }}
+          />
         </div>
   </div>
   </Hero>
@@ -149,6 +160,7 @@ const ProfileBanner: React.FC<BannerProps> = ({ backgroundImage }) => {
           Now Streaming: Your Day ❤️
         </div>
       )}
+      <QuietNoteModal open={qnOpen} onClose={()=>setQnOpen(false)} line={"Right now, finding me is your task — because I’m invisible to the world."} />
     </div>
   );
 };
