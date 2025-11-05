@@ -38,5 +38,15 @@ export function useFullscreen(target: HTMLElement | null) {
     };
   }, [toggle, exit]);
 
+  // Prevent background scroll while in fullscreen for better UX on mobile
+  useEffect(() => {
+    const root = document.documentElement as HTMLElement;
+    if (isFullscreen) {
+      const prev = root.style.overflow;
+      root.style.overflow = 'hidden';
+      return () => { root.style.overflow = prev; };
+    }
+  }, [isFullscreen]);
+
   return { isFullscreen, enter, exit, toggle };
 }

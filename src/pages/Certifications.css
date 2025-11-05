@@ -4,13 +4,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
-  padding: 10rem 1rem;
+  min-height: 100svh; /* use visual viewport height on mobile */
+  padding: 6rem 1rem;
   text-align: center;
   background: linear-gradient(180deg, rgba(0, 0, 1, 0.9) 10%, rgba(20, 20, 20, 0.9) 100%);
   background-size: 200% 200%;
   color: #fff;
   animation: backgroundShift 10s ease-in-out infinite;
+  /* safe-area awareness */
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-top: max(6rem, env(safe-area-inset-top));
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
 }
 
 .certifications-title {
@@ -48,8 +53,21 @@
   opacity: 0;
   transform: translateY(50px) rotate(-2deg) scale(0.95); /* Subtle rotation and scale */
   animation: cardFadeIn 0.6s forwards ease-in-out;
-  animation-delay: var(--delay); /* Staggered animation for grid layout */
+  /* Staggered animation via data attribute mapping below */
+  animation-delay: calc(var(--i, 0) * 0.2s);
 }
+
+/* Map data-i to CSS variable for stagger without inline styles */
+.certification-card[data-i="0"] { --i: 0; }
+.certification-card[data-i="1"] { --i: 1; }
+.certification-card[data-i="2"] { --i: 2; }
+.certification-card[data-i="3"] { --i: 3; }
+.certification-card[data-i="4"] { --i: 4; }
+.certification-card[data-i="5"] { --i: 5; }
+.certification-card[data-i="6"] { --i: 6; }
+.certification-card[data-i="7"] { --i: 7; }
+.certification-card[data-i="8"] { --i: 8; }
+.certification-card[data-i="9"] { --i: 9; }
 
 .certification-card:hover {
   transform: scale(1.08) rotate(0deg); /* Zoom and straight hover */

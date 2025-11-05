@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isNavLocked } from '../lib/access';
 import './Certifications.css';
+import Section from '../components/layout/Section';
 import { FaExternalLinkAlt, FaUniversity } from 'react-icons/fa';
 import { SiUdemy, SiCoursera, SiIeee } from 'react-icons/si';
 import { Certification } from '../types';
@@ -33,11 +34,12 @@ const Certifications: React.FC = () => {
   if (certifications.length === 0) return <div>Loading...</div>;
 
   return (
-    <div className="certifications-container">
+    <Section className="items-start py-10 sm:py-14 lg:py-20 w-full">
+      <div className="certifications-container">
       <h1 className="certifications-title">Letters</h1>
       <div className="certifications-grid">
         {certifications.map((cert, index) => (
-          <a href={cert.link} key={index} target="_blank" rel="noopener noreferrer" className="certification-card" style={{ '--delay': `${index * 0.2}s` } as React.CSSProperties}>
+          <a href={cert.link} key={index} target="_blank" rel="noopener noreferrer" className="certification-card" data-i={index}>
             <div className="certification-content">
               <div className="certification-icon">{iconData[cert.iconName] || <FaUniversity />}</div>
               <h3>{cert.title}</h3>
@@ -50,7 +52,8 @@ const Certifications: React.FC = () => {
           </a>
         ))}
       </div>
-    </div>
+      </div>
+    </Section>
   );
 };
 

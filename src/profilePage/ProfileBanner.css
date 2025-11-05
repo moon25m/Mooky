@@ -232,6 +232,24 @@
   }
 }
 
+/* Landscape phones/tablets with very short height: tighten layout */
+@media (orientation: landscape) and (max-height: 480px) {
+  .profile-banner {
+    padding: 16px; /* reduce chrome */
+    align-items: center;
+    justify-content: center;
+  }
+  .hero-title {
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    margin-bottom: 0.25rem;
+  }
+  .subtitle { font-size: clamp(0.9rem, 1.6vw, 1rem); }
+  .banner-description { display: none; }
+  .now-streaming-overlay { display: none; }
+  .banner-buttons { gap: 6px; }
+  .banner-button { padding: 8px 12px; font-size: 0.85rem; }
+}
+
 /* Maturity badge — rectangular Netflix style bottom-right */
 .maturity-badge {
   position: absolute;

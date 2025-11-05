@@ -1,11 +1,16 @@
 .profile-page {
   display: flex;
   align-items: center;
-  height: 100vh;
+  min-height: 100svh; /* visual viewport height for mobile URL bar */
   color: #fff;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
+  /* safe-area paddings so content doesn't collide with notches / home bars */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 h1 {
@@ -14,8 +19,5 @@ h1 {
 }
 
 @media (max-width: 768px) {
-  .profile-page {
-    height: 100vh;
-    padding-bottom: 5rem;
-  }
+  .profile-page { padding-bottom: max(5rem, env(safe-area-inset-bottom)); }
 }

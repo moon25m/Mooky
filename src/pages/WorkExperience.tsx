@@ -9,6 +9,7 @@ import { FaStar as StarIcon } from 'react-icons/fa';
 import './WorkExperience.css';
 import { TimelineItem } from '../types';
 import { getTimeline } from '../queries/getTimeline';
+import Section from '../components/layout/Section';
 
 
 const WorkExperience: React.FC = () => {
@@ -32,7 +33,7 @@ const WorkExperience: React.FC = () => {
   console.log("🚀 ~ timeLineData:", timeLineData)
 
   return (
-    <>
+    <Section className="items-start py-10 sm:py-14 lg:py-20 w-full">
       <div className="timeline-container">
         <h1 className="timeline-title">Echoes</h1>
         <h2 className="timeline-title">📅 Work Experience & Education Timeline</h2>
@@ -63,14 +64,14 @@ const WorkExperience: React.FC = () => {
             icon={item.timelineType === "work" ? <WorkIcon /> : <SchoolIcon />}
           >
             {item.timelineType === "work" ? (
-              <div style={{ color: 'black' }}>
+              <div className="timeline-content-body">
                 <h3 className="vertical-timeline-element-title">{item.title}</h3>
                 <h4 className="vertical-timeline-element-subtitle">{item.name}</h4>
                 <p className="vertical-timeline-element-tech">🔧 {item.techStack}</p>
                 <p>{item.summaryPoints}</p>
               </div>
             ) : (
-              <div style={{ color: 'black' }}>
+              <div className="timeline-content-body">
                 <h3 className="vertical-timeline-element-title">{item.name}</h3>
                 <h4 className="vertical-timeline-element-subtitle">{item.title}</h4>
                 <p>{item.summaryPoints}</p>
@@ -83,7 +84,7 @@ const WorkExperience: React.FC = () => {
           icon={<StarIcon />}
         />
       </VerticalTimeline>
-    </>
+    </Section>
   );
 };
 

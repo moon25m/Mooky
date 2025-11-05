@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { isNavLocked } from '../lib/access';
 import './Skills.css';
 import { getSkills } from '../queries/getSkills';
+import Section from '../components/layout/Section';
 
 import { FaReact, FaNodeJs, FaAws, FaDocker, FaJava } from 'react-icons/fa';
 import { SiRubyonrails, SiTypescript, SiPostgresql, SiMysql, SiKubernetes, SiGooglecloud, SiSpringboot, SiPhp, SiNetlify, SiHeroku, SiRabbitmq, SiImessage } from 'react-icons/si';
@@ -56,7 +57,8 @@ const Skills: React.FC = () => {
 
 
   return (
-    <div className="skills-container">
+    <Section className="items-start py-10 sm:py-14 lg:py-20 w-full">
+      <div className="skills-container">
       <h1 className="skills-title">Moments</h1>
       {Object.keys(skillsByCategory).map((category, index) => (
         <div key={index} className="skill-category">
@@ -78,7 +80,8 @@ const Skills: React.FC = () => {
           </div>
         </div>
       ))}
-    </div>
+      </div>
+    </Section>
   );
 };
 

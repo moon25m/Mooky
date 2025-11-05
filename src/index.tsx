@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
+import OrientationClass from './components/OrientationClass';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -12,6 +13,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <ErrorBoundary>
     <Router>
+      <OrientationClass />
       <App />
     </Router>
   </ErrorBoundary>

@@ -28,15 +28,15 @@ export default function StageControls({ targetId }: { targetId: string }) {
 
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden="false">
-      <div className={`pointer-events-auto absolute bottom-3 right-3 transition-opacity ${visible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`pointer-events-auto absolute bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] right-3 transition-opacity ${visible ? 'opacity-100' : 'opacity-0'}`}>
         <button
           type="button"
           onClick={toggle}
-          aria-pressed={isFullscreen}
+          aria-pressed={isFullscreen ? 'true' : 'false'}
           aria-label={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen (f)'}
           title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen (f)'}
           disabled={!supported}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/10 bg-neutral-900/70 text-neutral-100 shadow backdrop-blur-sm hover:bg-neutral-800/80 active:bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-white/10 bg-neutral-900/70 text-neutral-100 shadow backdrop-blur-sm hover:bg-neutral-800/80 active:bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50"
         >
           {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
         </button>

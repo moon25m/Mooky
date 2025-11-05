@@ -12,6 +12,9 @@
   text-align: center;
   padding: 20px;
   margin-top: 5rem;
+  /* Safe-area awareness */
+  padding-left: max(20px, env(safe-area-inset-left));
+  padding-right: max(20px, env(safe-area-inset-right));
 }
 
 .timeline-title {
@@ -24,6 +27,11 @@
   opacity: 0; /* Start invisible */
   transform: translateY(20px); /* Start slightly lower */
   animation: fadeInUp 2s ease-in-out both; /* Animation properties */
+}
+
+/* Black text inside timeline cards (library styles set light backgrounds) */
+.timeline-content-body {
+  color: #000;
 }
 
 /* Define the keyframes for the fade-in-up animation */

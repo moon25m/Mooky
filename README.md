@@ -1,165 +1,166 @@
-## 🌟 Sumanth Samala's Netflix inspired Portfolio 🌟 - https://sumanthsamala.com/
+# 🌌 MOOKY — Cinematic Real‑Time Birthday Experience
 
-Welcome to my personal portfolio project! 🚀 This website showcases my work, skills, and experiences in web development. It's designed to be lightweight, customizable, and professional while maintaining an approachable style.
+A Netflix‑inspired, real‑time, interactive birthday web app. Built for the web and mobile (iOS/Android), it blends a cinematic dark + neon red theme with live wishes, presence, and a fullscreen surprise stage.
 
-Explore specific subdomains tailored to different tech stacks:
-
-- 🌟 [java.sumanthsamala.com](https://java.sumanthsamala.com/) for Java Spring Boot-related work.
-- 🌟 [node.sumanthsamala.com](https://node.sumanthsamala.com/) for Node.js and backend development.
-- 🌟 [frontend.sumanthsamala.com](https://frontend.sumanthsamala.com/) for frontend development expertise.
-- 🌟 [ror.sumanthsamala.com](https://ror.sumanthsamala.com/) for Ruby on Rails projects.
-
-![Screenshot from 2024-12-08 19-19-06](https://github.com/user-attachments/assets/f8220485-16ec-48cf-8cb2-7853540c5724)
+- ⚡ Instant, real‑time wish updates (multi‑device)
+- 💌 Friendly composer with typing indicator and presence
+- 🎬 Fullscreen “Surprise” stage with safe‑area aware controls
+- 📱 Mobile‑first with portrait + landscape support (svh + safe areas)
+- 🚀 Deployed on Vercel; serverless APIs + Edge-friendly DB
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-- 🌍 **Dynamic Content**: Powered by [DatoCMS](https://www.datocms.com) for easy content management.
-- ⚡ **Fast & Responsive**: Built with modern web technologies for seamless performance.
-- 🎨 **Customizable**: Modular and easy to adapt to your own needs.
-- 📈 **Professional Yet Personal**: Highlights projects, skills, and achievements.
-- 🎨 It can support various por
-
----
-
-## 🛠️ Tech Stack
-
-This portfolio is built with love and:
-
-- ⚛️ **React** (Frontend)
-- ☁️ **AWS S3 & CloudFront** (Hosting and CDN)
-- 🖌️ **Tailwind CSS** (Styling)
-- 🛡️ **DatoCMS** (Content Management)
-- 🧩 **Other Cool Tools**: GitHub Actions
+- Live wishes feed with Pusher + SSE fallback
+- Optimistic wish submission and SWR reconciliation
+- Presence channel ("X here now") and typing indicator
+- Surprise page with overlay controls and proper fullscreen polish (safe‑area insets, 44×44 targets)
+- Responsive layouts, fluid spacing, and landscape helpers (short‑height devices)
 
 ---
 
-## ⭐ Show Your Support
+## 🧰 Tech Stack
 
-If you find this project helpful or inspiring, give it a ⭐ on GitHub—it means the world to me! 🌟
-
-Happy coding! 💻✨
+| Area | Technology |
+|---|---|
+| Framework | Next.js (App Router, React 18) |
+| Styling | TailwindCSS (dark + neon red) |
+| Hosting | Vercel (Edge + Node serverless) |
+| Database | Neon PostgreSQL |
+| Realtime | Pusher Channels |
+| Data fetching | SWR + native fetch |
+| Animations | Framer Motion (optional) |
 
 ---
 
-## 📚 Getting Started
+## 🔗 Live URLs
 
-Want to set this up locally? Follow these steps:
+| Environment | URL |
+|---|---|
+| Production | https://your-mooky-domain.vercel.app |
+| Surprise (external) | https://hbd-card.netlify.app |
 
-1. **Clone the Repository**: Copy the repository to your local system.
-2. **Install Dependencies**: Use a package manager to install the required dependencies.
+> Replace the production URL with your deployed domain.
+
+---
+
+## 📸 Screenshots
+
+Place screenshots in `public/screenshots/` and they will render nicely on GitHub:
+
+- `public/screenshots/home.png`
+- `public/screenshots/wishes.png`
+- `public/screenshots/surprise.png`
+
+Example embeds:
+
+![Home](public/screenshots/home.png)
+![Wishes](public/screenshots/wishes.png)
+![Surprise](public/screenshots/surprise.png)
+
+---
+
+## ⚙️ Setup
+
+### 1) Clone
 
 ```bash
-nvm install 18
-nvm use 18
+git clone https://github.com/your-user/mooky.git
+cd mooky
 ```
 
-After upgrading Node.js, clear your node_modules and reinstall:
+### 2) Install
 
 ```bash
-rm -rf node_modules
-npm cache clean --force
 npm install
 ```
 
-3. **Configure Environment Variables**: Create a `.env` file and set up the necessary API keys and configurations.
-4. **Run the Project**: Start the development server.
+### 3) Environment
+
+Create `.env.local` at the project root with your secrets:
 
 ```bash
-npm start
+# Database (Neon Postgres)
+DATABASE_URL=postgres://USER:PASSWORD@HOSTNAME/dbname?sslmode=require
+
+# Pusher (server)
+PUSHER_APP_ID=xxxxx
+PUSHER_KEY=xxxxx
+PUSHER_SECRET=xxxxx
+PUSHER_CLUSTER=eu
+
+# Pusher (client)
+NEXT_PUBLIC_PUSHER_KEY=xxxxx
+NEXT_PUBLIC_PUSHER_CLUSTER=eu
+
+# Surprise page (external demo; optional)
+NEXT_PUBLIC_SURPRISE_URL=https://hbd-card.netlify.app/
 ```
 
-5. **Visit the Local Server**: Open your browser and navigate to the local server URL.
-   ![alt text](image.png)
+Notes:
+- Copy the actual Postgres connection string from Neon (not the `psql` helper command).
+- Keep server keys only on the server; expose only `NEXT_PUBLIC_*` to the browser.
 
----
+### 4) Dev
 
-## 🤝 Contribution Guidelines
-
-Contributions are welcome and appreciated! 🥳 To contribute:
-
-1. Fork the repository.
-2. Create a new branch for your feature or fix.
-3. Commit your changes with a descriptive message.
-4. Push your changes to your branch.
-5. Open a Pull Request. 🎉
-
----
-
-## 🐛 Issues and Feature Requests
-
-Found a bug? Have a feature in mind? 🤔 Feel free to raise an issue or suggest a feature!
-
-1. Go to the **Issues** tab in the repository.
-2. Click **New Issue**.
-3. Provide a clear description of the bug or feature request.
-4. If applicable, include screenshots or steps to reproduce the issue.
-
-Your feedback is valuable and helps make this project better for everyone. Thank you for contributing!
-
----
-
-## 🌟 Acknowledgments
-
-- Thanks to [DatoCMS](https://www.datocms.com) for powering the dynamic content.
-- Inspired by countless developers in the open-source community. 💻
-- Special shoutout to all contributors—you rock! 🤘
-
----
-
-## 📧 Contact Me
-
-- 💼 [Portfolio Website](https://sumanthsamala.com)
-- 📧 Email: [chintusamala96@gmail.com](mailto:chintusamala96@gmail.com)
-- 🔗 [LinkedIn](https://uk.linkedin.com/in/sumanth-samala-82431161)
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License. Feel free to use it, modify it, and share it! 🌈
-
----
-
-Deployment heartbeat: 2025-11-05 — no-op change to trigger Vercel redeploy on main.
-
----
-
-## Realtime Birthday Wishes (Vercel + Neon + Pusher)
-
-- Serverless endpoints
-   - `GET /api/wish` — returns latest wishes (Cache-Control: no-store)
-   - `POST /api/wish` — inserts a wish into Neon and broadcasts via Pusher
-   - `GET /api/wish/count` — returns `{ count }` (no-store)
-   - `POST /api/wish/typing` — broadcasts typing start/stop via Pusher
-- Client
-   - Uses Server-Sent Events for low-latency list updates
-   - Uses Pusher Channels for instant broadcast plus a typing indicator
-   - SWR polling (6–8s) as fallback to keep devices consistent
-
-### Environment
-
-Set these in Vercel → Project → Settings → Environment Variables:
-
-```
-DATABASE_URL=postgres://USER:PASS@HOST/db?sslmode=require
-PUSHER_APP_ID=
-PUSHER_KEY=
-PUSHER_SECRET=
-PUSHER_CLUSTER=
-
-# Client (CRA)
-REACT_APP_PUSHER_KEY=
-REACT_APP_PUSHER_CLUSTER=
+```bash
+npm run dev
 ```
 
-Note: If copying from Neon dashboard, paste the actual Postgres URL only (not the `psql ...` command). The app sanitizes common mistakes but correct values are best.
+Open http://localhost:3000 and try the Wishes page on two devices to see live updates.
 
-### Verify
+### 5) Build
 
-1) Open the Wishes page on two devices.
-2) Start typing on device A — “Someone is typing…” appears on device B.
-3) Submit a wish on A — the message appears instantly on B, the count updates; within a few seconds SWR polling confirms consistency.
-4) Hard refresh both — both list and counts match.
+```bash
+npm run build && npm run start
+```
+
+---
+
+## 🚀 Deploy (Vercel)
+
+1. Push your repo to GitHub.
+2. Import on https://vercel.com (Framework Preset: Next.js).
+3. Add Environment Variables in Project → Settings → Environment Variables:
+   - `DATABASE_URL`
+   - `PUSHER_APP_ID`, `PUSHER_KEY`, `PUSHER_SECRET`, `PUSHER_CLUSTER`
+   - `NEXT_PUBLIC_PUSHER_KEY`, `NEXT_PUBLIC_PUSHER_CLUSTER`
+   - `NEXT_PUBLIC_SURPRISE_URL`
+4. Trigger a deploy. Confirm the Wishes feed updates across devices.
+
+---
+
+## 📐 Mobile Perfection Checklist
+
+- `min-h-[100svh]` for full‑height sections (no jump when URL bar shows/hides)
+- Safe‑area insets via `env(safe-area-inset-*)` and `viewport-fit=cover`
+- Stage wrappers use responsive aspect ratio with helpers for ultra‑narrow and short landscape devices
+- Controls meet 44×44px tap targets and sit above the safe‑area
+- Grids adapt at `sm/md/lg` with no horizontal page scroll
+
+---
+
+## 👩‍💻 Developer
+
+- GitHub: https://github.com/your-user
+- Hosting: Vercel
+- DB: Neon PostgreSQL
+- Realtime: Pusher Channels
+
+---
+
+## 📄 License
+
+MIT © MOOKY
+
+---
+
+## 🌙 About MOOKY
+
+MOOKY is a cinematic, interactive birthday experience crafted to feel alive. It takes cues from Netflix’s bold composition and pairs it with a soft neon‑red palette, building a space where messages spark, count up, and stream between friends in real‑time.
+
+Under the hood, serverless APIs, a hosted Postgres, and realtime channels keep everything snappy and reliable. On the surface, it’s light and playful: a wishes wall that updates instantly, a fullscreen surprise that’s safe‑area polished on iOS/Android, and a layout that feels at home in portrait and landscape. 🎉💌
+
+Whether you’re celebrating from your phone or a big screen, MOOKY keeps the moment immersive—simple to use, beautiful to share, and delightful to revisit. 🌙⚡
 

@@ -70,6 +70,14 @@ const TopPicksRow: React.FC<TopPicksRowProps> = ({ profile }) => {
           <div 
             key={index} 
             className="pick-card" 
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                (e.currentTarget as HTMLElement).click();
+              }
+            }}
             onClick={(e) => {
               // For Galaxy: always show access denied on the 5 gallery cards
               if (isGalaxyCard && isGateActive()) {
@@ -85,7 +93,8 @@ const TopPicksRow: React.FC<TopPicksRowProps> = ({ profile }) => {
               }
               navigate(pick.route);
             }}
-            style={{ animationDelay: `${index * 0.2}s` }} // Adding delay based on index
+            // Using data attribute instead of inline style to avoid style warnings
+            data-i={index}
           >
             <img src={pick.imgSrc} alt={displayTitle} className="pick-image" />
             <div className="overlay">

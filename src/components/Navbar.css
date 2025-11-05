@@ -56,6 +56,9 @@
   font-size: 1.05rem;
   position: relative;
   transition: color 0.25s ease;
+  /* Larger touch target and visible focus ring */
+  padding: 8px 0;
+  outline: none;
 }
 
 .navbar-links li a:hover {
@@ -120,6 +123,11 @@
   .hamburger {
     display: block;
     cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 8px;
+    border-radius: 8px;
+    outline: none;
   }
 
   .hamburger div {
@@ -192,6 +200,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 10px 0;
   }
 
   /* Close button inside the sidebar */

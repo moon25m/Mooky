@@ -30,6 +30,6 @@ export default async function handler(req: Request) {
 }
 
 function json(obj: any, init: ResponseInit = {}){
-  return new Response(JSON.stringify(obj), { ...init, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', ...(init.headers||{}) } });
+  return new Response(JSON.stringify(obj), { ...init, headers: { 'content-type': 'application/json', ...(init.headers||{}) } });
 }
 function bad(status: number, error: string){ return json({ ok:false, error }, { status }); }

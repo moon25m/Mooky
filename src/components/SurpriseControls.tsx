@@ -26,7 +26,7 @@ export default function SurpriseControls({ targetId, openHref }:{ targetId:strin
       <button
         type="button"
         onClick={toggle}
-        aria-pressed={isFullscreen}
+        aria-pressed={isFullscreen ? 'true' : 'false'}
         aria-label={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen (f)'}
         title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen (f)'}
         disabled={!fullscreenSupported}

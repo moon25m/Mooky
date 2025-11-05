@@ -71,7 +71,7 @@ export default function Surprise(){
       {/* Media Stage */}
       <section className="mb-4 rounded-xl border border-neutral-800 bg-neutral-900 p-2">
         <div className="relative">
-          <div id="surprise-stage" ref={stageRef} className="relative w-full overflow-hidden rounded-xl bg-black aspect-[16/9]">
+          <div id="surprise-stage" ref={stageRef} className="relative w-full overflow-hidden rounded-xl bg-black aspect-[16/9] relax-aspect landscape-tight">
             <iframe
               ref={iframeRef}
               title="Happy Birthday Card"

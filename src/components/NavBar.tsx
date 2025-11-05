@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaHome, FaBriefcase, FaTools, FaProjectDiagram, FaEnvelope, FaStar } from 'react-icons/fa'; // Import icons
 import './Navbar.css';
@@ -20,6 +20,8 @@ const Navbar: React.FC = () => {
   const [showIntro, setShowIntro] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showGate, setShowGate] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
   const profileImage = location.state?.profileImage || blueImage;
 
   const handleScroll = () => {
@@ -44,11 +46,13 @@ const Navbar: React.FC = () => {
   }, []);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen((open) => !open);
   };
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
+    // Return focus to the menu button for accessibility
+    try { menuButtonRef.current?.focus(); } catch {}
   };
 
   const onNavClick = (path: string, e: React.MouseEvent) => {
@@ -82,11 +86,19 @@ const Navbar: React.FC = () => {
         </div>
         <div className="navbar-right">
           {/* Hamburger menu for mobile */}
-          <div className="hamburger" onClick={toggleSidebar}>
+          <button
+            type="button"
+            className="hamburger"
+            onClick={toggleSidebar}
+            aria-controls="mobile-menu"
+            aria-expanded={isSidebarOpen ? 'true' : 'false'}
+            aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+            ref={menuButtonRef}
+          >
             <div></div>
             <div></div>
             <div></div>
-          </div>
+          </button>
           <img
             src={profileImage}
             alt="Profile"
@@ -110,10 +122,42 @@ const Navbar: React.FC = () => {
       </nav>
 
       {/* Sidebar Overlay */}
-      <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={closeSidebar}></div>
+  <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={closeSidebar} aria-hidden="true"></div>
 
       {/* Sidebar (only visible on mobile) */}
-      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+      <div
+        id="mobile-menu"
+        className={`sidebar ${isSidebarOpen ? 'open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Main menu"
+        ref={sidebarRef}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.stopPropagation();
+            closeSidebar();
+          }
+          if (e.key === 'Tab') {
+            const root = sidebarRef.current;
+            if (!root) return;
+            const focusables = root.querySelectorAll<HTMLElement>('a, button, [tabindex]:not([tabindex="-1"])');
+            if (!focusables.length) return;
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (e.shiftKey) {
+              if (document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+              }
+            } else {
+              if (document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+              }
+            }
+          }
+        }}
+      >
         <div className="sidebar-logo brand-text brand" aria-label="Mooky">
           {location.pathname === '/' || location.pathname === '/home' ? (
             <MookyLogoNetflix className={`brand-logo ${showIntro ? 'mooky-animate' : ''}`} variant="compact" />
@@ -122,12 +166,12 @@ const Navbar: React.FC = () => {
           )}
         </div>
         <ul>
-          <li><Link to="/browse" onClick={(e)=>{closeSidebar(); onNavClick('/browse', e);}}><FaHome /> Home</Link></li>
-          <li><Link to="/echoes" onClick={(e)=>{closeSidebar(); onNavClick('/echoes', e);}}><FaBriefcase /> Echoes</Link></li>
-          <li><Link to="/moments" onClick={(e)=>{closeSidebar(); onNavClick('/moments', e);}}><FaTools /> Moments</Link></li>
-          <li><Link to="/letters" onClick={(e)=>{closeSidebar(); onNavClick('/letters', e);}}><FaProjectDiagram /> Letters</Link></li>
-          <li><Link to="/whisper" onClick={(e)=>{closeSidebar(); onNavClick('/whisper', e);}}><FaEnvelope /> Whisper</Link></li>
-          <li><Link to="/wish" onClick={(e)=>{closeSidebar(); onNavClick('/wish', e);}}><FaStar /> Wishes</Link></li>
+          <li><Link to="/browse" onClick={(e)=>{closeSidebar(); onNavClick('/browse', e);}}><FaHome aria-hidden="true"/> Home</Link></li>
+          <li><Link to="/echoes" onClick={(e)=>{closeSidebar(); onNavClick('/echoes', e);}}><FaBriefcase aria-hidden="true"/> Echoes</Link></li>
+          <li><Link to="/moments" onClick={(e)=>{closeSidebar(); onNavClick('/moments', e);}}><FaTools aria-hidden="true"/> Moments</Link></li>
+          <li><Link to="/letters" onClick={(e)=>{closeSidebar(); onNavClick('/letters', e);}}><FaProjectDiagram aria-hidden="true"/> Letters</Link></li>
+          <li><Link to="/whisper" onClick={(e)=>{closeSidebar(); onNavClick('/whisper', e);}}><FaEnvelope aria-hidden="true"/> Whisper</Link></li>
+          <li><Link to="/wish" onClick={(e)=>{closeSidebar(); onNavClick('/wish', e);}}><FaStar aria-hidden="true"/> Wishes</Link></li>
         </ul>
       </div>
       <AccessDeniedModal open={showGate} onClose={()=>setShowGate(false)} />

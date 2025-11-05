@@ -2,12 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body { height: 100%; }
 body {
   margin: 0;
   font-family: 'Netflix Sans',Helvetica Neue,Segoe UI,Roboto,Ubuntu,sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #141414;
+  background-color: #0a0a0a;
+  overscroll-behavior-y: none;
+  overflow-x: hidden;
 }
 
 code {
@@ -27,3 +30,18 @@ code {
 /* Safari */
 #surprise-stage:-webkit-full-screen { border-radius: 0 !important; }
 #surprise-stage:-webkit-full-screen iframe { border-radius: 0 !important; }
+
+/* Ultra-narrow phone helper: allows height-first layout when width is tiny */
+@media (max-width: 360px) {
+  .relax-aspect { aspect-ratio: auto !important; height: 60svh !important; }
+}
+
+/* Landscape phone helper: when height is short, prefer width-driven layout */
+@media (orientation: landscape) and (max-height: 480px) {
+  .landscape-tight { aspect-ratio: auto !important; height: 80svh !important; }
+  .landscape-hide-on-very-short { display: none !important; }
+}
+
+/* Optional orientation class helpers */
+body.is-landscape .landscape-hide { display: none !important; }
+body.is-landscape .landscape-flex { display: flex !important; }
