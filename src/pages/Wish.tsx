@@ -63,12 +63,10 @@ export default function Wish() {
       let list: WishItem[] = [];
       let usedSeed = false;
       try {
-        // Prefer unified endpoint that disables caching
-        const res = await fetch('/api/wish', { cache: 'no-store' });
+        const res = await fetch('/api/wishes', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json().catch(() => ({}));
-          const got = Array.isArray(data?.data) ? data.data : data?.wishes; // support both shapes
-          list = normalizeList(got).filter((w: WishItem) => !hasBadWord(w.message));
+          list = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
         }
       } catch {
         // ignore and try fallback
@@ -108,43 +106,6 @@ export default function Wish() {
       setLoading(false);
     })();
   }, []);
-
-  // Periodic refresh and on-focus revalidate to avoid stale data after tab is reopened
-  useEffect(() => {
-    let stop = false;
-    const refresh = async () => {
-      try {
-        const res = await fetch('/api/wish', { cache: 'no-store' });
-        if (!res.ok) return;
-        const json = await res.json().catch(() => ({}));
-        const got = Array.isArray(json?.data) ? json.data : json?.wishes;
-        const fresh = normalizeList(got).filter((w: WishItem) => !hasBadWord(w.message));
-        if (fresh.length) {
-          fresh.sort((a,b)=>b.createdAt - a.createdAt);
-          // Only update if there is a real change to avoid flicker
-          const incomingIds = new Set(fresh.map(w=>w.id));
-          const currentIds = new Set(wishes.map(w=>w.id));
-          let changed = fresh.length !== wishes.length;
-          if (!changed) {
-            Array.from(incomingIds).some((id) => {
-              if (!currentIds.has(id)) { changed = true; return true; }
-              return false;
-            });
-          }
-          if (changed) {
-            knownIds.current = new Set(fresh.map(w=>w.id));
-            setWishes(fresh);
-            localStorage.setItem('mooky:wishes', JSON.stringify(fresh));
-          }
-        }
-      } catch {}
-    };
-    const iv = setInterval(refresh, 8000);
-    const onFocus = () => refresh();
-    window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refresh(); });
-    return () => { clearInterval(iv); window.removeEventListener('focus', onFocus); };
-  }, [wishes]);
 
   // SSE live updates + highlight
   useEffect(() => {
