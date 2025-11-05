@@ -20,3 +20,10 @@ code {
   --brand-dark: #0b0b0b;
   --brand-white: #ffffff;
 }
+
+/* Fullscreen polish for the Surprise stage */
+#surprise-stage:fullscreen { border-radius: 0 !important; }
+#surprise-stage:fullscreen iframe { border-radius: 0 !important; }
+/* Safari */
+#surprise-stage:-webkit-full-screen { border-radius: 0 !important; }
+#surprise-stage:-webkit-full-screen iframe { border-radius: 0 !important; }
