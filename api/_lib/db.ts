@@ -24,7 +24,7 @@ async function ensureSchema(sql = getDb()) {
 
 export async function listWishes(sql = getDb()): Promise<Wish[]> {
   await ensureSchema(sql);
-  const rows = await sql`select id, name, message, created_at from wishes order by created_at desc` as any;
+  const rows = await sql`select id, name, message, created_at from wishes order by created_at desc limit 100` as any;
   return rows as Wish[];
 }
 

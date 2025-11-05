@@ -8,7 +8,11 @@ const { neon } = require('@neondatabase/serverless');
 const { randomUUID } = require('crypto');
 
 function send(res, status, body) {
-  res.status(status).setHeader('content-type', 'application/json').send(JSON.stringify(body));
+  res
+    .status(status)
+    .setHeader('content-type', 'application/json')
+    .setHeader('cache-control', 'no-store')
+    .send(JSON.stringify(body));
 }
 
 async function readRawBody(req) {
@@ -57,12 +61,12 @@ module.exports = async function handler(req, res) {
 
     console.info('POST /api/wish', { requestId, len: message.length });
 
-    const sql = neon(url);
-    const id = randomUUID();
+  const sql = neon(url);
+  const id = randomUUID();
 
-    await sql`insert into wishes (id, name, message) values (${id}, ${name}, ${message})`;
-
-    return send(res, 201, { ok: true, id });
+  const rows = await sql`insert into wishes (id, name, message) values (${id}, ${name}, ${message}) returning id, name, message, created_at`;
+  const row = Array.isArray(rows) && rows[0] ? rows[0] : { id, name, message, created_at: new Date().toISOString() };
+  return send(res, 201, { ok: true, wish: { id: row.id, name: row.name, message: row.message, createdAt: Date.parse(row.created_at) || Date.now() } });
   } catch (err) {
     console.error('POST /api/wish', { error: err?.message || String(err) });
     return send(res, 500, { ok: false, error: err?.message || 'Server error' });

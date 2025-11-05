@@ -3,11 +3,13 @@ import confetti from 'canvas-confetti';
 import toast, { Toaster } from 'react-hot-toast';
 import { avatarUrl, linkifyText, MAX_LEN, sanitizeMessage, timeago, BAD_WORDS } from '../lib/wish-utils';
 import '../styles/wishes-pro.css';
+import useWishes from '../hooks/useWishes';
 
 export type WishItem = { id: string; name: string; message: string; createdAt: number };
 type WishWithFlash = WishItem & { __flash?: boolean };
 
 export default function Wish() {
+  const { wishes: swrWishes, loading: swrLoading, addWish } = useWishes();
   const [wishes, setWishes] = useState<WishWithFlash[]>([]);
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
@@ -57,91 +59,16 @@ export default function Wish() {
     return (Array.isArray(arr) ? arr : []).map(normalizeWish);
   }
 
-  // Initial snapshot via REST (authoritative) with robust fallback
+  // Bind SWR results into local state for flash animations and localStorage
   useEffect(() => {
-    (async () => {
-      let list: WishItem[] = [];
-      let usedSeed = false;
-      try {
-        const res = await fetch('/api/wishes', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json().catch(() => ({}));
-          list = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
-        }
-      } catch {
-        // ignore and try fallback
-      }
+    const list = (swrWishes || []).filter(w => !hasBadWord(w.message)).sort((a,b)=>b.createdAt - a.createdAt);
+    knownIds.current = new Set(list.map(w=>w.id));
+    setWishes(list);
+    localStorage.setItem('mooky:wishes', JSON.stringify(list));
+    setLoading(false);
+  }, [swrWishes]);
 
-      // Fallback: if API is empty or failed, load seed file from public assets
-      if (!list.length) {
-        try {
-          const sres = await fetch('/assets/wishes.seed.json', { cache: 'no-store' });
-          if (sres.ok) {
-            const seeds = await sres.json().catch(() => []);
-            const seeded = normalizeList(seeds).filter((w: WishItem) => !hasBadWord(w.message));
-            if (seeded.length) { list = seeded; usedSeed = true; }
-          }
-        } catch {
-          // still nothing; leave list empty
-        }
-      }
-
-      // If we had to use seeds but there's cached wishes (e.g., recent sends), merge and prefer cached
-      try {
-        if (usedSeed) {
-          const cached = JSON.parse(localStorage.getItem('mooky:wishes') || '[]') as WishItem[];
-          if (Array.isArray(cached) && cached.length) {
-            const map = new Map<string, WishItem>();
-            for (const w of list) map.set(w.id, w);
-            for (const w of cached) map.set(w.id, w); // cached wins
-            list = Array.from(map.values());
-          }
-        }
-      } catch {}
-
-      list.sort((a,b)=>b.createdAt - a.createdAt);
-      knownIds.current = new Set(list.map(w=>w.id));
-      setWishes(list);
-      localStorage.setItem('mooky:wishes', JSON.stringify(list));
-      setLoading(false);
-    })();
-  }, []);
-
-  // SSE live updates + highlight
-  useEffect(() => {
-    const es = new EventSource('/api/wishes/stream');
-    es.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data);
-        if (data.type === 'snapshot') {
-          const list: WishItem[] = normalizeList(data?.wishes).filter((w: WishItem) => !hasBadWord(w.message));
-          // If the DB snapshot is empty, keep whatever we already have (e.g., static fallback)
-          if (list.length) {
-            list.sort((a,b)=>b.createdAt - a.createdAt);
-            knownIds.current = new Set(list.map(w=>w.id));
-            setWishes(list);
-            localStorage.setItem('mooky:wishes', JSON.stringify(list));
-          }
-        }
-        if (data.type === 'wish') {
-          const w: WishItem = normalizeWish(data.wish);
-          if (hasBadWord(w.message)) return; // drop inappropriate wishes client-side as a safeguard
-          if (knownIds.current.has(w.id)) return; // dedupe
-          knownIds.current.add(w.id);
-          setWishes(prev => {
-            const next = [{ ...w, __flash: true }, ...prev].sort((a,b)=>b.createdAt - a.createdAt);
-            localStorage.setItem('mooky:wishes', JSON.stringify(next));
-            return next;
-          });
-          setTimeout(() => {
-            setWishes(prev => prev.map(x => ({ ...x, __flash: false })) as WishWithFlash[]);
-          }, 1200);
-        }
-      } catch { /* ignore */ }
-    };
-    es.onerror = () => es.close();
-    return () => es.close();
-  }, []);
+  // Remove SSE, SWR handles polling and sync; flash will come from optimistic add
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -150,25 +77,9 @@ export default function Wish() {
   if (hasBadWord(clean)) return toast.error('Inappropriate language is not allowed.');
     setSending(true);
     try {
-      const res = await fetch('/api/wish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), message: clean })
-      });
-      if (!res.ok) {
-        const b = await res.json().catch(() => ({}));
-        throw new Error(b?.error || 'Request failed');
-      }
-      // Optimistic update so the new wish appears instantly; SSE will reconcile
-      const body = await res.json().catch(() => ({}));
-      const newId = body?.id || `tmp-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}`;
-      const optimistic: WishItem = { id: String(newId), name: name.trim() || 'Anonymous', message: clean, createdAt: Date.now() };
-      knownIds.current.add(optimistic.id);
-      setWishes(prev => {
-        const next = [{ ...optimistic, __flash: true }, ...prev].sort((a,b)=>b.createdAt - a.createdAt);
-        localStorage.setItem('mooky:wishes', JSON.stringify(next));
-        return next;
-      });
+      await addWish(name.trim(), clean);
+      // Add flash to the newest item
+      setWishes(prev => prev.map((x, i) => i === 0 ? ({ ...x, __flash: true }) : x) as WishWithFlash[]);
       setTimeout(() => setWishes(prev => prev.map(x => ({ ...x, __flash: false })) as WishWithFlash[]), 1200);
       setMessage('');
       toast.success('Wish sent!');
