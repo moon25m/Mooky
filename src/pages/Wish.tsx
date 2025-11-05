@@ -9,6 +9,7 @@ type WishWithFlash = WishItem & { __flash?: boolean };
 
 export default function Wish() {
   const [wishes, setWishes] = useState<WishWithFlash[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -72,7 +73,7 @@ export default function Wish() {
         // ignore and try fallback
       }
 
-      // Fallback: if API is empty or failed, load seed file from public assets
+  // Fallback: if API is empty or failed, load seed file from public assets
       if (!list.length) {
         try {
           const sres = await fetch('/assets/wishes.seed.json', { cache: 'no-store' });
@@ -102,6 +103,7 @@ export default function Wish() {
       list.sort((a,b)=>b.createdAt - a.createdAt);
       knownIds.current = new Set(list.map(w=>w.id));
       setWishes(list);
+      setTotalCount(list.length);
       localStorage.setItem('mooky:wishes', JSON.stringify(list));
       setLoading(false);
     })();
@@ -120,7 +122,10 @@ export default function Wish() {
             list.sort((a,b)=>b.createdAt - a.createdAt);
             knownIds.current = new Set(list.map(w=>w.id));
             setWishes(list);
+            setTotalCount(typeof data.count === 'number' ? data.count : list.length);
             localStorage.setItem('mooky:wishes', JSON.stringify(list));
+          } else if (typeof data.count === 'number') {
+            setTotalCount(data.count);
           }
         }
         if (data.type === 'wish') {
@@ -133,9 +138,13 @@ export default function Wish() {
             localStorage.setItem('mooky:wishes', JSON.stringify(next));
             return next;
           });
+          setTotalCount(c => c + 1);
           setTimeout(() => {
             setWishes(prev => prev.map(x => ({ ...x, __flash: false })) as WishWithFlash[]);
           }, 1200);
+        }
+        if (data.type === 'stats' && typeof data.count === 'number') {
+          setTotalCount(data.count);
         }
       } catch { /* ignore */ }
     };
@@ -169,6 +178,7 @@ export default function Wish() {
         localStorage.setItem('mooky:wishes', JSON.stringify(next));
         return next;
       });
+      setTotalCount(c => c + 1);
       setTimeout(() => setWishes(prev => prev.map(x => ({ ...x, __flash: false })) as WishWithFlash[]), 1200);
       setMessage('');
       toast.success('Wish sent!');
@@ -188,7 +198,7 @@ export default function Wish() {
       <section className="wish-hero">
         <div className="wish-hero-inner">
           <h1>Birthday Wishes <span className="live-dot" aria-label="live" title="live"/></h1>
-          <p>Leave a message — it appears live on this wall. <span className="count">{wishes.length + 1} wishes</span></p>
+          <p>Leave a message — it appears live on this wall. <span className="count">{totalCount + 1} wishes</span></p>
           <div className="surprise-cta">
             <a href="/surprise" className="btn-primary surprise-link">Surprise ✨</a>
           </div>

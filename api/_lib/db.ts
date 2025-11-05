@@ -60,3 +60,9 @@ export async function insertWish(name: string, message: string, sql = getDb()): 
   const rows = await sql`insert into wishes (id, name, message) values (${id}, ${name}, ${message}) returning id, name, message, created_at` as any;
   return (rows as Wish[])[0];
 }
+
+export async function countWishes(sql = getDb()): Promise<number> {
+  await ensureSchema(sql);
+  const rows = await sql`select count(*)::int as n from wishes` as any;
+  return rows?.[0]?.n ?? 0;
+}

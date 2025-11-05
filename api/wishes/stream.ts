@@ -1,4 +1,4 @@
-import { getDb, listWishes, listWishesSince } from '../_lib/db';
+import { getDb, listWishes, listWishesSince, countWishes } from '../_lib/db';
 
 export const config = { runtime: 'edge' } as const;
 
@@ -21,6 +21,7 @@ export default async function handler(_req: Request) {
   }
   const encoder = new TextEncoder();
   let lastTs: string | null = null;
+  let lastCount: number | null = null;
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -29,10 +30,10 @@ export default async function handler(_req: Request) {
       if (rows.length) {
         lastTs = rows[0].created_at;
       } else {
-        // DB is empty: start polling from "now" so future inserts are picked up
         lastTs = new Date().toISOString();
       }
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type:'snapshot', wishes: rows })}\n\n`));
+      lastCount = await countWishes(getDb());
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type:'snapshot', wishes: rows, count: lastCount })}\n\n`));
 
       // poll loop (edge-safe)
       const interval = 3000;
@@ -45,9 +46,14 @@ export default async function handler(_req: Request) {
             for (const w of news) {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type:'wish', wish: w })}\n\n`));
             }
-          } else {
-            controller.enqueue(encoder.encode(`:keepalive\n\n`));
           }
+          // Always send stats when the count changes
+          const current = await countWishes(getDb());
+          if (lastCount === null || current !== lastCount) {
+            lastCount = current;
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type:'stats', count: current })}\n\n`));
+          }
+          controller.enqueue(encoder.encode(`:keepalive\n\n`));
         } catch {
           // swallow and keep polling
         }
