@@ -4,6 +4,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { avatarUrl, linkifyText, MAX_LEN, sanitizeMessage, timeago, BAD_WORDS } from '../lib/wish-utils';
 import '../styles/wishes-pro.css';
 import { useWishCount } from '../hooks/useWishCount';
+import { useWishes as useSWRWishes } from '../hooks/useWishes';
 import { useRealtimeWishes } from '../hooks/useRealtimeWishes';
 import { mutate as globalMutate } from 'swr';
 
@@ -14,6 +15,7 @@ export default function Wish() {
   const [wishes, setWishes] = useState<WishWithFlash[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const { data: swrCount } = useWishCount();
+  const { data: swrList } = useSWRWishes();
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -63,6 +65,25 @@ export default function Wish() {
       }
     } catch {}
   }, []);
+
+  // SWR polling fallback: if SSE/Pusher are unavailable, reconcile with /api/wish list periodically
+  useEffect(() => {
+    try {
+      const incoming = normalizeList((swrList as any)?.wishes || [])
+        .filter((w: WishItem) => !hasBadWord(w.message));
+      if (!incoming.length) return;
+      setWishes(prev => {
+        const map = new Map<string, WishWithFlash>();
+        for (const w of prev) map.set(w.id, w);
+        for (const w of incoming) map.set(w.id, { ...w });
+        const next = Array.from(map.values()).sort((a,b)=>b.createdAt - a.createdAt) as WishWithFlash[];
+        knownIds.current = new Set(next.map(w=>w.id));
+        localStorage.setItem('mooky:wishes', JSON.stringify(next));
+        return next;
+      });
+      setTotalCount(c => Math.max(c, incoming.length));
+    } catch {}
+  }, [swrList]);
 
   // Normalize server wish objects (supports snake_case created_at or camelCase createdAt)
   function normalizeWish(w: any): WishItem {
