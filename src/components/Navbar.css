@@ -9,16 +9,22 @@
   position: fixed;
   width: 100%;
   top: 0;
-  /* Transparent by default so the hero background is visible beneath */
-  background: rgba(0,0,0,0);
+  /* Fully transparent at the top */
+  background: transparent;
   padding: 20px;
-  z-index: 3;
-  transition: background-color 0.3s ease;
+  z-index: 999; /* elevated so it sits above hero */
+  transition: background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
-.navbar.scrolled {
-  /* Keep transparent even after scrolling to avoid a black bar */
-  background-color: transparent;
+.navbar.nav-scrolled {
+  /* Slight darkening and soft cinematic shadow when scrolled */
+  background: rgba(0,0,0,0.35);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.45);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 
 .navbar-left, .navbar-right {
@@ -148,7 +154,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 3;
+    z-index: 1001; /* sit above the navbar when open */
     display: none;
   }
 
@@ -171,7 +177,7 @@
     justify-content: center;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    z-index: 4;
+    z-index: 1002; /* ensure sidebar overlays the navbar */
   }
 
   .sidebar.open {

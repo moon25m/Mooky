@@ -25,7 +25,8 @@ const Navbar: React.FC = () => {
   const profileImage = location.state?.profileImage || blueImage;
 
   const handleScroll = () => {
-    setIsScrolled(window.scrollY > 80);
+    // Toggle scrolled state at small threshold for subtle effect
+    setIsScrolled(window.scrollY > 10);
   };
 
   useEffect(() => {
@@ -66,7 +67,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
+  <nav className={`navbar ${isScrolled ? 'nav-scrolled' : ''}`}>
         <div className="navbar-left">
           <Link to="/" className="navbar-logo brand-text brand" aria-label="Mooky home">
             {location.pathname === '/' || location.pathname === '/home' ? (
