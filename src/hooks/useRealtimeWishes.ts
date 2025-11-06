@@ -16,8 +16,8 @@ export function useRealtimeWishes(onNewWish?: (w: WishRow) => void) {
     ch.bind(EVENTS.NEW, (row: WishRow) => {
       try { onNewWish?.(row); } catch {}
       // Revalidate SWR keys if present
-      try { globalMutate('/api/wish'); } catch {}
-      try { globalMutate('/api/wish/count'); } catch {}
+      try { globalMutate('/api/wishes'); } catch {}
+      try { globalMutate('/api/wishes/count'); } catch {}
     });
 
     ch.bind(EVENTS.TYPING_START, (p: { name: string }) => {

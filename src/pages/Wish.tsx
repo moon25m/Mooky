@@ -7,6 +7,7 @@ import { useWishCount } from '../hooks/useWishCount';
 import { useWishes as useSWRWishes } from '../hooks/useWishes';
 import { useRealtimeWishes } from '../hooks/useRealtimeWishes';
 import { mutate as globalMutate } from 'swr';
+import { setAdminFromHash, isAdmin } from '../lib/admin';
 
 export type WishItem = { id: string; name: string; message: string; createdAt: number };
 type WishWithFlash = WishItem & { __flash?: boolean };
@@ -84,6 +85,11 @@ export default function Wish() {
         setWishes(cached);
       }
     } catch {}
+  }, []);
+
+  // Admin gate: check URL hash like #admin=PASS and set mooky_admin cookie
+  useEffect(() => {
+    try { setAdminFromHash(); } catch {}
   }, []);
 
   // SWR polling fallback: if SSE/Pusher are unavailable, reconcile with /api/wish list periodically
@@ -243,8 +249,8 @@ export default function Wish() {
       setTimeout(() => setWishes(prev => prev.map(x => ({ ...x, __flash: false })) as WishWithFlash[]), 1200);
       setMessage('');
   // Trigger SWR revalidation across devices
-  globalMutate('/api/wish');
-  globalMutate('/api/wish/count');
+  globalMutate('/api/wishes');
+  globalMutate('/api/wishes/count');
   toast.success('Wish sent!');
       confetti({ particleCount: 90, spread: 65, origin: { y: 0.25 } });
     } catch (err) {
@@ -352,6 +358,47 @@ export default function Wish() {
               <header className="meta">
                 <b className="who">{w.name || 'Anonymous'}</b>
                 <time title={new Date(w.createdAt).toLocaleString()}>{timeago(w.createdAt)}</time>
+                {isAdmin() && (
+                  <button
+                    className="delete-btn"
+                    aria-label={`Delete wish by ${w.name || 'Anonymous'}`}
+                    onClick={async () => {
+                      try {
+                        const confirmMsg = `Delete this wish by ${w.name || 'Anonymous'}? This cannot be undone.`;
+                        if (!window.confirm(confirmMsg)) return;
+                        const token = window.prompt('Admin pass (or leave blank to use session)') || '';
+                        // optimistic remove
+                        const prev = wishes;
+                        setWishes(prev => prev.filter(x => x.id !== w.id));
+                        setTotalCount(c => Math.max(0, c - 1));
+
+                        const headers: any = {};
+                        if (token) headers['x-admin-pass'] = token;
+
+                        const res = await fetch(`/api/messages/${encodeURIComponent(w.id)}`, {
+                          method: 'DELETE', headers
+                        });
+                        if (!res.ok) {
+                          setWishes(prev);
+                          setTotalCount(c => c + 1);
+                          const body = await res.json().catch(()=>({} as any));
+                          throw new Error(body?.error || 'Delete failed');
+                        }
+                        const body = await res.json().catch(() => ({} as any));
+                        const remaining = typeof body?.remaining === 'number' ? body.remaining : null;
+                        toast.success('Deleted');
+                        // Revalidate list
+                        try { globalMutate('/api/wishes'); } catch {}
+                        // Update count cache with returned remaining (no revalidation)
+                        try { globalMutate('/api/wishes/count', remaining !== null ? remaining : undefined, false); } catch {}
+                      } catch (err) {
+                        toast.error((err as Error)?.message || 'Could not delete');
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
               </header>
               <p className="text" dangerouslySetInnerHTML={{ __html: linkifyText(w.message) }} />
             </div>

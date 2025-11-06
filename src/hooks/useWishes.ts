@@ -6,7 +6,7 @@ const fetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(r => r.j
 
 export function useWishes() {
   const { data, error, isLoading, mutate } = useSWR<{ wishes: WishItem[] }>(
-    '/api/wish',
+    '/api/wishes',
     fetcher,
     { refreshInterval: 8000, revalidateOnFocus: true }
   );

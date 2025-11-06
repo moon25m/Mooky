@@ -85,6 +85,27 @@ load();
 exports.wishesStore = {
   all(){ return wishes.slice().sort((a,b)=> b.createdAt - a.createdAt); },
   push(w){ wishes.push(w); persist(); bus.emit('wish', w); },
+  // Delete a wish by id. Returns true if deleted.
+  delete(id){
+    const idx = wishes.findIndex(x => String(x.id) === String(id));
+    if (idx === -1) return false;
+    const [removed] = wishes.splice(idx, 1);
+    try { persist(); } catch (e) { console.error('[wishesStore] persist on delete failed', e); }
+    // emit a delete event in case listeners want to react
+    try { bus.emit('wish:deleted', removed); } catch {}
+    return true;
+  },
+  // Async count of wishes (reads file for authoritative value)
+  async count() {
+    try {
+      ensureDataFile();
+      const raw = fs.readFileSync(DATA_FILE, 'utf8');
+      const arr = JSON.parse(raw || '[]');
+      return Array.isArray(arr) ? arr.filter(x => x && typeof x.id === 'string').length : 0;
+    } catch (e) {
+      try { return wishes.length; } catch { return 0; }
+    }
+  },
   onWish(fn){ bus.on('wish', fn); },
   offWish(fn){ bus.off('wish', fn); },
 };

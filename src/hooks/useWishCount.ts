@@ -4,7 +4,7 @@ const fetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(r => r.j
 
 export function useWishCount() {
   const { data, error, isLoading, mutate } = useSWR<{ count: number }>(
-    '/api/wish/count',
+    '/api/wishes/count',
     fetcher,
     { refreshInterval: 6000, revalidateOnFocus: true }
   );

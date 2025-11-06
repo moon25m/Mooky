@@ -74,6 +74,45 @@ app.get('/api/wishes/stream', (req, res) => {
   });
 });
 
+// Admin-only delete endpoint for dev server (file-backed store)
+app.delete('/api/messages/:id', (req, res) => {
+  try {
+    const id = String(req.params.id || '');
+    if (!id) return res.status(400).json({ ok: false, error: 'Missing id' });
+
+    const headerPass = String(req.headers['x-admin-pass'] || '');
+    const cookieFlag = String(req.cookies?.mooky_admin || req.headers.cookie?.includes('mooky_admin=1') ? '1' : '') || '';
+    const expected = process.env.MOOKY_ADMIN_PASS || process.env.NEXT_PUBLIC_MOOKY_ADMIN_PASS || '';
+    if (!(expected && headerPass === expected) && cookieFlag !== '1') {
+      return res.status(401).json({ ok: false, error: 'Unauthorized' });
+    }
+
+    const ok = wishesStore.delete(id);
+    if (!ok) return res.status(404).json({ ok: false, error: 'Not found' });
+    // return remaining count
+    try {
+      const remaining = await (wishesStore.count ? wishesStore.count() : Promise.resolve(wishesStore.all().length));
+      return res.json({ ok: true, remaining });
+    } catch (e) {
+      return res.json({ ok: true });
+    }
+  } catch (e) {
+    console.error('[server] delete failed', e);
+    return res.status(500).json({ ok: false, error: 'Server error' });
+  }
+});
+
+// Count endpoint for dev
+app.get('/api/wishes/count', async (_req, res) => {
+  try {
+    const count = await (wishesStore.count ? wishesStore.count() : Promise.resolve(wishesStore.all().length));
+    return res.json({ count });
+  } catch (e) {
+    console.error('[server] count failed', e);
+    return res.status(500).json({ count: 0 });
+  }
+});
+
 // In production, serve the React build as static files from the same server
 // This lets us deploy a single service (API + frontend) to hosts like Render/Railway.
 if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === '1') {
