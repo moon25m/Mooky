@@ -18,13 +18,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          # this repo uses Yarn (yarn.lock). Use Yarn cache and Yarn install in CI.
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Build
-        run: npm run -s build
+        run: yarn build
 
       - name: Upload build artifact
         if: success()
