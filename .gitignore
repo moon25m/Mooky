@@ -23,6 +23,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# lock files: we use yarn.lock in this repo; prevent accidental commit of package-lock.json
+package-lock.json
+
 # runtime data
 server/data/*.json
 server/data/backups/
