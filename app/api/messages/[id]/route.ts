@@ -1,5 +1,6 @@
 export { DELETE } from '../../../wish/[id]/route';
 export const runtime = 'edge';
+export const runtime = 'edge';
 
 function parseCookies(cookieHeader?: string) {
   const out: Record<string,string> = {};

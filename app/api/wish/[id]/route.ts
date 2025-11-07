@@ -1,5 +1,5 @@
 export const runtime = 'edge';
-import { deleteWish } from '../../../../src/lib/store';
+import { deleteWish } from '../../../../server/lib/store';
 
 function json(body: any, status = 200) {
   return new Response(JSON.stringify(body), {
