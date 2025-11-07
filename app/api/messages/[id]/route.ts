@@ -26,7 +26,7 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
   if (process.env.NODE_ENV === 'production') {
     const expected = process.env.MOOKY_ADMIN_PASS || '';
     if (!expected || headerPass !== expected) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'content-type':'application/json' } });
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
     }
   } else {
     const cookies = parseCookies(req.headers.get('cookie') || '');
@@ -41,7 +41,7 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
   // In production we require both DATABASE_URL and MOOKY_ADMIN_PASS to be set.
   if (process.env.NODE_ENV === 'production') {
     if (!process.env.DATABASE_URL || !process.env.MOOKY_ADMIN_PASS) {
-      return new Response(JSON.stringify({ error: 'Server not configured' }), { status: 503, headers: { 'content-type':'application/json' } });
+      return new Response(JSON.stringify({ error: 'Server not configured' }), { status: 503, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
     }
   }
 
@@ -71,9 +71,9 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
       try {
         const cnt = await sql`select count(*)::int as count from wishes` as any;
         const remaining = cnt?.[0]?.count ?? 0;
-        return new Response(JSON.stringify({ success: true, remaining }), { status: 200, headers: { 'content-type':'application/json' } });
+        return new Response(JSON.stringify({ success: true, remaining }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
       } catch {
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'content-type':'application/json' } });
+        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
       }
     } catch (e: any) {
       console.error('[messages/delete] postgres delete failed', e?.message || e);
@@ -83,7 +83,7 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
 
   // If we're in production, do not allow file-store fallback.
   if (process.env.NODE_ENV === 'production') {
-    return new Response(JSON.stringify({ error: 'Not available' }), { status: 404, headers: { 'content-type':'application/json' } });
+    return new Response(JSON.stringify({ error: 'Not available' }), { status: 404, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
   }
 
   // Fallback: file-backed store used by the Express dev server (only in non-production)
@@ -94,7 +94,7 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
     const path = require('path');
     const dataFile = path.join(process.cwd(), 'server', 'data', 'wishes.json');
     if (!fs.existsSync(dataFile)) {
-      return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'content-type':'application/json' } });
+      return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
     }
     const raw = fs.readFileSync(dataFile, 'utf8');
     const arr = JSON.parse(raw || '[]');
@@ -103,10 +103,10 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
   arr.splice(idx, 1);
   fs.writeFileSync(dataFile, JSON.stringify(arr, null, 2), 'utf8');
   const remaining = Array.isArray(arr) ? arr.filter(x => x && typeof x.id === 'string').length : 0;
-  return new Response(JSON.stringify({ success: true, remaining }), { status: 200, headers: { 'content-type':'application/json' } });
+  return new Response(JSON.stringify({ success: true, remaining }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
   } catch (e: any) {
     console.error('[messages/delete] file delete failed', e?.message || e);
-    return new Response(JSON.stringify({ error: 'Server error' }), { status: 500, headers: { 'content-type':'application/json' } });
+    return new Response(JSON.stringify({ error: 'Server error' }), { status: 500, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
   }
 }
 

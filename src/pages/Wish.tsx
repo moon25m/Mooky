@@ -379,10 +379,14 @@ export default function Wish() {
                           method: 'DELETE', headers
                         });
                         if (!res.ok) {
+                          // Restore optimistic state on failure
                           setWishes(prev);
                           setTotalCount(c => c + 1);
-                          const body = await res.json().catch(()=>({} as any));
-                          throw new Error(body?.error || 'Delete failed');
+                          // Try to parse JSON body, otherwise capture status text
+                          let body: any = null;
+                          try { body = await res.json(); } catch { body = null; }
+                          const msg = (body && body.error) ? body.error : `${res.status} ${res.statusText}`;
+                          throw new Error(msg || 'Delete failed');
                         }
                         const body = await res.json().catch(() => ({} as any));
                         const remaining = typeof body?.remaining === 'number' ? body.remaining : null;
