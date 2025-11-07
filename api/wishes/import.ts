@@ -1,4 +1,4 @@
-import { getDb } from '../_lib/db.js';
+import { getDb } from '../_lib/db';
 
 export const runtime = 'edge';
 

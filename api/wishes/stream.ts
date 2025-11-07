@@ -1,4 +1,4 @@
-import { getDb, listWishes, listWishesSince, countWishes } from '../_lib/db.js';
+import { getDb, listWishes, listWishesSince, countWishes } from '../_lib/db';
 
 export const config = { runtime: 'edge' } as const;
 

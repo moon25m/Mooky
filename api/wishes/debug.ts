@@ -1,5 +1,5 @@
-import { getDb } from '../_lib/db.js';
-import { sanitizeDbUrl } from '../_lib/url-sanitize.js';
+import { getDb } from '../_lib/db';
+import { sanitizeDbUrl } from '../_lib/url-sanitize';
 
 export const config = { runtime: 'edge' } as const;
 
