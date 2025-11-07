@@ -4,7 +4,7 @@ import '../styles/quiet-note.css';
 export default function QuietNoteModal({
   open,
   onClose,
-  line = "Right now, finding me is your task — because I’m invisible to the world."
+  line = "Right now, finding me is your task — because I’m invisible to the world. If I pour this much effort into you… I could watch the world burn and still keep my hands clean. 🐉"
 }:{
   open: boolean;
   onClose: () => void;

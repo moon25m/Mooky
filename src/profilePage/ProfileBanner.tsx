@@ -160,7 +160,7 @@ const ProfileBanner: React.FC<BannerProps> = ({ backgroundImage }) => {
           Now Streaming: Your Day ❤️
         </div>
       )}
-      <QuietNoteModal open={qnOpen} onClose={()=>setQnOpen(false)} line={"Right now, finding me is your task — because I’m invisible to the world."} />
+  <QuietNoteModal open={qnOpen} onClose={()=>setQnOpen(false)} line={"Right now, finding me is your task — because I’m invisible to the world. If I pour this much effort into you… I could watch the world burn and still keep my hands clean. 🐉"} />
     </div>
   );
 };
