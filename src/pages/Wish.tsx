@@ -400,7 +400,7 @@ export default function Wish() {
                           // Optimistic UI update
                           setWishes(prev => prev.filter(x => x.id !== wish.id));
                           setTotalCount(c => Math.max(0, c - 1));
-                          const res = await fetch(`/api/wish/${encodeURIComponent(wish.id)}`, {
+                          const res = await fetch(`/api/messages/${encodeURIComponent(wish.id)}`, {
                             method: 'DELETE',
                             headers: {
                               'x-admin-pass': admin,
