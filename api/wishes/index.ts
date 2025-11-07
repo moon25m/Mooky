@@ -1,5 +1,5 @@
-import { getDb, insertWish, listWishes } from '../_lib/db';
-import { containsBadWords } from '../_lib/profanity';
+import { getDb, insertWish, listWishes } from '../_lib/db.js';
+import { containsBadWords } from '../_lib/profanity.js';
 
 export const config = { runtime: 'edge' } as const;
 
