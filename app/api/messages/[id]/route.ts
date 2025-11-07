@@ -65,8 +65,8 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
 
       // Try exact id delete first
       let rows = await sql`delete from wishes where id = ${id} returning id` as any;
-      // If not found and id looks like an 8-char hex, try prefix match (short id)
-      if ((!Array.isArray(rows) || rows.length === 0) && /^[0-9a-f]{8}$/i.test(String(id))) {
+      // If not found and id looks like an 8-char token, try prefix match (short id)
+      if ((!Array.isArray(rows) || rows.length === 0) && String(id).length === 8) {
         try {
           rows = await sql`delete from wishes where left(id, 8) = ${id} returning id` as any;
           if (Array.isArray(rows) && rows.length > 1) {
@@ -85,9 +85,10 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
       try {
         const cnt = await sql`select count(*)::int as count from wishes` as any;
         const remaining = cnt?.[0]?.count ?? 0;
-        return new Response(JSON.stringify({ success: true, remaining }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
-      } catch {
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
+        return new Response(JSON.stringify({ ok: true, remaining }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
+      } catch (e) {
+        console.error('[messages/delete] count query failed', e?.message || e);
+        return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
       }
     } catch (e: any) {
       console.error('[messages/delete] postgres delete failed', e?.message || e);
@@ -114,10 +115,10 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
     const arr = JSON.parse(raw || '[]');
     const idx = arr.findIndex((x:any) => String(x.id) === String(id));
     if (idx === -1) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'content-type':'application/json' } });
-  arr.splice(idx, 1);
-  fs.writeFileSync(dataFile, JSON.stringify(arr, null, 2), 'utf8');
-  const remaining = Array.isArray(arr) ? arr.filter(x => x && typeof x.id === 'string').length : 0;
-  return new Response(JSON.stringify({ success: true, remaining }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
+    arr.splice(idx, 1);
+    fs.writeFileSync(dataFile, JSON.stringify(arr, null, 2), 'utf8');
+    const remaining = Array.isArray(arr) ? arr.filter(x => x && typeof x.id === 'string').length : 0;
+    return new Response(JSON.stringify({ ok: true, remaining }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
   } catch (e: any) {
     console.error('[messages/delete] file delete failed', e?.message || e);
     return new Response(JSON.stringify({ error: 'Server error' }), { status: 500, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });

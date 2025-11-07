@@ -26,7 +26,14 @@ function containsBadWords(text = '') {
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 app.get('/api/wishes', (_req, res) => {
-  res.json({ wishes: wishesStore.all() });
+  try {
+    // Include a shortId (first 8 chars) so clients can render labels while keeping full id for operations
+    const list = (wishesStore.all() || []).map(w => ({ ...w, shortId: String(w.id).slice(0,8) }));
+    res.json({ wishes: list });
+  } catch (e) {
+    console.error('[server] /api/wishes failed', e);
+    res.json({ wishes: wishesStore.all() });
+  }
 });
 
 app.post('/api/wishes', async (req, res) => {

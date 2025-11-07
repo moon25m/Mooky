@@ -9,7 +9,7 @@ import { useRealtimeWishes } from '../hooks/useRealtimeWishes';
 import { mutate as globalMutate } from 'swr';
 import { setAdminFromHash, isAdmin } from '../lib/admin';
 
-export type WishItem = { id: string; name: string; message: string; createdAt: number };
+export type WishItem = { id: string; shortId?: string; name: string; message: string; createdAt: number };
 type WishWithFlash = WishItem & { __flash?: boolean };
 
 // Normalize server wish objects (supports snake_case created_at or camelCase createdAt)
@@ -21,6 +21,7 @@ function normalizeWish(w: any): WishItem {
   else ts = Date.now();
   return {
     id: String(w.id),
+    shortId: String(w.id).slice(0,8),
     name: String(w.name || ''),
     message: String(w.message || ''),
     createdAt: ts
@@ -364,20 +365,32 @@ export default function Wish() {
                     aria-label={`Delete wish by ${w.name || 'Anonymous'}`}
                     onClick={async () => {
                       try {
-                        // Dev-only: log the real id for debugging
-                        if (process.env.NODE_ENV !== 'production') {
-                          try { console.log('[dev] delete id', w.id); } catch {}
-                        }
+                        // Debug: log the real id and header presence for troubleshooting
+                        try { console.debug('[DELETE] sending id:', w.id); } catch {}
                         const confirmMsg = `Delete this wish by ${w.name || 'Anonymous'}? This cannot be undone.`;
                         if (!window.confirm(confirmMsg)) return;
-                        const token = window.prompt('Admin pass (or leave blank to use session)') || '';
+
+                        // Admin pass: prefer sessionStorage-cached pass in production; prompt once and cache
+                        const ADMIN_KEY = 'mooky_admin_pass';
+                        let token = sessionStorage.getItem(ADMIN_KEY) || '';
+                        if (!token) {
+                          // Prompt once and cache to sessionStorage for this browser session
+                          const prompted = window.prompt('Admin pass (stored to session for this browser)') || '';
+                          if (prompted) {
+                            try { sessionStorage.setItem(ADMIN_KEY, prompted); } catch {}
+                            token = prompted;
+                          }
+                        }
+
                         // optimistic remove
                         const prev = wishes;
                         setWishes(prev => prev.filter(x => x.id !== w.id));
                         setTotalCount(c => Math.max(0, c - 1));
 
                         const headers: any = {};
+                        // Always send header when we have a token; in prod server requires header
                         if (token) headers['x-admin-pass'] = token;
+                        try { console.debug('[DELETE] header sent:', !!headers['x-admin-pass']); } catch {}
 
                         const res = await fetch(`/api/messages/${encodeURIComponent(w.id)}`, {
                           method: 'DELETE', headers
@@ -409,11 +422,11 @@ export default function Wish() {
                 )}
                 {isAdmin() && (
                   <span style={{display:'inline-flex', alignItems:'center', gap:8}}>
-                    <small className="admin-id" style={{ color:'#999'}} title={w.id}>#{String(w.id).slice(0,8)}</small>
+                    <small className="admin-id" style={{ color:'#999'}} title={w.id}>#{String(w.shortId || String(w.id).slice(0,8))}</small>
                     <button
                       className="copy-id"
                       title="Copy full id"
-                      onClick={(e)=>{ e.stopPropagation(); try { navigator.clipboard.writeText(w.id); toast.success('Copied id'); } catch { toast.error('Copy failed'); } }}
+                      onClick={(e)=>{ e.stopPropagation(); try { navigator.clipboard.writeText(w.id); toast.success('ID copied'); } catch { toast.error('Copy failed'); } }}
                       style={{ background:'transparent', border:'none', color:'#bbb', cursor:'pointer' }}
                     >
                       ⧉
