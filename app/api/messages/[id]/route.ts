@@ -65,7 +65,9 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
 
       const rows = await sql`delete from wishes where id = ${id} returning id` as any;
       if (!Array.isArray(rows) || rows.length === 0) {
-        return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'content-type':'application/json' } });
+          // Log missing id for diagnostics
+          try { console.error('[messages/delete] not found', { id }); } catch {}
+          return new Response(JSON.stringify({ error: 'Not found', id }), { status: 404, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
       }
       // get remaining count
       try {

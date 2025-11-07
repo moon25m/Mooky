@@ -352,7 +352,7 @@ export default function Wish() {
         </article>
 
         {wishes.map(w => (
-          <article key={w.id} className={`wish-card ${w.__flash ? 'flash' : ''}`}>
+          <article key={w.id} className={`wish-card ${w.__flash ? 'flash' : ''}`} data-id={w.id}>
             <img className="avatar" src={avatarUrl(w.name)} alt="" />
             <div className="content">
               <header className="meta">
@@ -402,6 +402,9 @@ export default function Wish() {
                   >
                     Delete
                   </button>
+                )}
+                {isAdmin() && (
+                  <small className="admin-id" style={{marginLeft:8, color:'#999'}} title={w.id}>#{String(w.id).slice(0,8)}</small>
                 )}
               </header>
               <p className="text" dangerouslySetInnerHTML={{ __html: linkifyText(w.message) }} />
