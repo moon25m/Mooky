@@ -1,12 +1,5 @@
-import { deleteWish } from '../../../../src/lib/store';
-// Unified DELETE handler for messages (admin-only)
-// Production: delete from Postgres (Neon) and require MOOKY_ADMIN_PASS + DATABASE_URL
-// Dev: will fallback to file-backed server/data/wishes.json when DATABASE_URL is not set
+export { DELETE } from '../../../wish/[id]/route';
 export const runtime = 'edge';
-
-// Note: this route is written to be safe in both Edge and Node runtimes. In production
-// we require DATABASE_URL and MOOKY_ADMIN_PASS to be present; we DO NOT touch the
-// file-backed store in production.
 
 function parseCookies(cookieHeader?: string) {
   const out: Record<string,string> = {};
