@@ -376,91 +376,67 @@ export default function Wish() {
           </div>
         </article>
 
-        {wishes.map(w => (
-          <article key={w.id} className={`wish-card ${w.__flash ? 'flash' : ''}`} data-id={w.id}>
-            <img className="avatar" src={avatarUrl(w.name)} alt="" />
-            <div className="content">
-              <header className="meta">
-                <b className="who">{w.name || 'Anonymous'}</b>
-                <time title={new Date(w.createdAt).toLocaleString()}>{timeago(w.createdAt)}</time>
-                {isAdmin && (
-                  // Show delete control only when admin is active (via hash or cookie)
-                  <button
-                  className="delete-btn"
-                  aria-label={`Delete wish by ${w.name || 'Anonymous'}`}
-                  onClick={async () => {
-                    try {
-                      try { console.debug('[DELETE] sending id:', w.id); } catch {}
-                      const confirmMsg = `Delete this wish by ${w.name || 'Anonymous'}? This cannot be undone.`;
-                      if (!window.confirm(confirmMsg)) return;
-
-                      // Admin pass comes from session (set when visiting #admin=TOKEN)
-                      const token = adminPass || getAdminPass();
-                      if (!token) {
-                        toast.error('Admin pass not set. Use #admin=TOKEN in URL to enable delete.');
-                        return;
-                      }
-
-                      // optimistic remove
-                      const prev = wishes;
-                      setWishes(prev => prev.filter(x => x.id !== w.id));
-                      setTotalCount(c => Math.max(0, c - 1));
-
-                      const headers: any = { 'x-admin-pass': token };
-                      try { console.debug('[DELETE] header sent:', !!headers['x-admin-pass']); } catch {}
-
-                      const res = await fetch(`/api/messages/${encodeURIComponent(w.id)}`, {
-                        method: 'DELETE', headers
-                      });
-                      if (!res.ok) {
-                        // Restore optimistic state on failure
-                        setWishes(prev);
-                        setTotalCount(c => c + 1);
-                        let body: any = null;
-                        try { body = await res.json(); } catch { body = null; }
-                        const msg = (body && body.error) ? body.error : `${res.status} ${res.statusText}`;
-                        throw new Error(msg || 'Delete failed');
-                      }
-                      const body = await res.json().catch(() => ({} as any));
-                      const remaining = typeof body?.remaining === 'number' ? body.remaining : null;
-                      toast.success('Deleted');
-                      try { globalMutate('/api/wishes'); } catch {}
-                      try { globalMutate('/api/wishes/count', remaining !== null ? remaining : undefined, false); } catch {}
-                    } catch (err) {
-                      // Provide clearer error guidance for production vs auth issues
-                      const msg = (err as Error)?.message || 'Could not delete';
-                      // If unauthorized, give a hint to check production admin secret
-                      if (/401|Unauthorized|Unauthorized/.test(String(msg))) {
-                        toast.error('Unauthorized — check admin pass (server) or Vercel env MOOKY_ADMIN_PASS');
-                      } else if (/503|Server not configured/.test(String(msg))) {
-                        toast.error('Server not configured — check DATABASE_URL and MOOKY_ADMIN_PASS on Vercel');
-                      } else {
-                        toast.error(msg);
-                      }
-                    }
-                  }}
-                >
-                  Delete
-                  </button>
-                )}
-                {isAdmin && (
-                  <span style={{display:'inline-flex', alignItems:'center', gap:8}}>
-                    <small className="admin-id" style={{ color:'#999'}} title={w.id}>#{String(w.shortId || String(w.id).slice(0,8))}</small>
-                    <button
-                      className="copy-id"
-                      title="Copy full id"
-                      onClick={(e)=>{ e.stopPropagation(); try { navigator.clipboard.writeText(w.id); toast.success('ID copied'); } catch { toast.error('Copy failed'); } }}
-                      style={{ background:'transparent', border:'none', color:'#bbb', cursor:'pointer' }}
-                    >
-                      ⧉
-                    </button>
-                  </span>
-                )}
-              </header>
-              <p className="text" dangerouslySetInnerHTML={{ __html: linkifyText(w.message) }} />
-            </div>
-          </article>
-        ))}
+        {wishes.map(wish => {
+          const shortId = wish?.id ? wish.id.slice(0, 8) : '';
+          return (
+            <article key={wish.id} className={`wish-card ${wish.__flash ? 'flash' : ''}`} data-id={wish.id}>
+              <img className="avatar" src={avatarUrl(wish.name)} alt="" />
+              <div className="content">
+                <header className="meta">
+                  <b className="who">{wish.name || 'Anonymous'}</b>
+                  <time title={new Date(wish.createdAt).toLocaleString()}>{timeago(wish.createdAt)}</time>
+                  {isAdmin && (
+                    <div className="flex items-center gap-2 text-xs text-zinc-400">
+                      <span>#{shortId}</span>
+                      <button
+                        type="button"
+                        className="text-red-400 hover:text-red-300 text-sm"
+                        aria-label={`Delete #${shortId}`}
+                        title={`Delete #${shortId}`}
+                        onClick={async () => {
+                          const admin = getAdminPass();
+                          if (!admin) return;
+                          if (!window.confirm(`Delete this wish by ${wish.name || 'Anonymous'}? This cannot be undone.`)) return;
+                          // Optimistic UI update
+                          setWishes(prev => prev.filter(x => x.id !== wish.id));
+                          setTotalCount(c => Math.max(0, c - 1));
+                          const res = await fetch(`/api/messages/${encodeURIComponent(wish.id)}`, {
+                            method: 'DELETE',
+                            headers: {
+                              'x-admin-pass': admin,
+                              'content-type': 'application/json',
+                            },
+                          });
+                          if (!res.ok) {
+                            setWishes(prev => [...prev, wish]);
+                            setTotalCount(c => c + 1);
+                            toast.error(`Delete failed (${res.status})`);
+                            return;
+                          }
+                          toast.success('Deleted');
+                          try { globalMutate('/api/wishes'); } catch {}
+                          try { globalMutate('/api/wishes/count'); } catch {}
+                        }}
+                      >
+                        Delete
+                      </button>
+                      <button
+                        type="button"
+                        className="hover:underline"
+                        title="Copy full ID"
+                        aria-label="Copy full ID"
+                        onClick={() => navigator.clipboard.writeText(wish.id)}
+                      >
+                        ⧉
+                      </button>
+                    </div>
+                  )}
+                </header>
+                <p className="text" dangerouslySetInnerHTML={{ __html: linkifyText(wish.message) }} />
+              </div>
+            </article>
+          );
+        })}
       </section>
     </main>
   );

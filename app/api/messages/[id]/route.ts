@@ -18,15 +18,25 @@ function parseCookies(cookieHeader?: string) {
   return out;
 }
 
+function json(body: any, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'content-type': 'application/json',
+      'cache-control': 'no-store',
+    },
+  });
+}
+
 export async function DELETE(req: Request, { params }:{ params: { id: string } }) {
-  const id = params?.id || '';
-  if (!id) return new Response(JSON.stringify({ error: 'Missing id' }), { status: 400, headers: { 'content-type':'application/json' } });
+  const input = (params?.id || '').trim();
+  if (!input) return json({ ok: false, error: 'missing_id' }, 400);
   const headerPass = req.headers.get('x-admin-pass') || '';
   // In production require header-only auth; cookie-based admin is not accepted
   if (process.env.NODE_ENV === 'production') {
     const expected = process.env.MOOKY_ADMIN_PASS || '';
     if (!expected || headerPass !== expected) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
+      return json({ ok: false, error: 'unauthorized' }, 401);
     }
   } else {
     const cookies = parseCookies(req.headers.get('cookie') || '');
@@ -34,14 +44,14 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
     const expected = process.env.MOOKY_ADMIN_PASS || process.env.NEXT_PUBLIC_MOOKY_ADMIN_PASS || process.env.REACT_APP_MOOKY_ADMIN_PASS || '';
     const authorized = (expected && headerPass === expected) || cookieFlag === '1';
     if (!authorized) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'content-type':'application/json' } });
+      return json({ ok: false, error: 'unauthorized' }, 401);
     }
   }
 
   // In production we require both DATABASE_URL and MOOKY_ADMIN_PASS to be set.
   if (process.env.NODE_ENV === 'production') {
     if (!process.env.DATABASE_URL || !process.env.MOOKY_ADMIN_PASS) {
-      return new Response(JSON.stringify({ error: 'Server not configured' }), { status: 503, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
+      return json({ ok: false, error: 'server_not_configured' }, 503);
     }
   }
 
@@ -63,42 +73,37 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
         )`;
       } catch {}
 
-      // Try exact id delete first
-      let rows = await sql`delete from wishes where id = ${id} returning id` as any;
-      // If not found and id looks like an 8-char token, try prefix match (short id)
-      if ((!Array.isArray(rows) || rows.length === 0) && String(id).length === 8) {
-        try {
-          rows = await sql`delete from wishes where left(id, 8) = ${id} returning id` as any;
-          if (Array.isArray(rows) && rows.length > 1) {
-            try { console.warn('[messages/delete] deleted multiple rows for short id', { id, deleted: rows.length }); } catch {}
-          }
-        } catch (e) {
-          console.error('[messages/delete] prefix delete failed', e?.message || e);
+      // List all wishes (for prefix match)
+      let allRows: any[] = [];
+      try {
+        allRows = await sql`select id from wishes` as any;
+      } catch {}
+
+      // Prefer exact match
+      let targetId = allRows.find(w => w.id === input)?.id || null;
+      // If not found, allow 8-hex prefix match (lenient: 6–32 hex)
+      if (!targetId) {
+        const isPrefix = /^[a-f0-9]{6,32}$/i.test(input);
+        if (isPrefix) {
+          targetId = allRows.find(w => w.id.startsWith(input))?.id || null;
         }
       }
+      if (!targetId) return json({ ok: false, error: 'not_found' }, 404);
+
+      // Delete by targetId
+      let rows = await sql`delete from wishes where id = ${targetId} returning id` as any;
       if (!Array.isArray(rows) || rows.length === 0) {
-        // Log missing id for diagnostics
-        try { console.error('[messages/delete] not found', { id }); } catch {}
-        return new Response(JSON.stringify({ error: 'Not found', id }), { status: 404, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
+        return json({ ok: false, error: 'not_found' }, 404);
       }
-      // get remaining count
-      try {
-        const cnt = await sql`select count(*)::int as count from wishes` as any;
-        const remaining = cnt?.[0]?.count ?? 0;
-        return new Response(JSON.stringify({ ok: true, remaining }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
-      } catch (e) {
-        console.error('[messages/delete] count query failed', e?.message || e);
-        return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
-      }
+      return json({ ok: true, deleted: targetId }, 200);
     } catch (e: any) {
-      console.error('[messages/delete] postgres delete failed', e?.message || e);
-      return new Response(JSON.stringify({ error: 'Server error' }), { status: 500, headers: { 'content-type':'application/json' } });
+      return json({ ok: false, error: String(e?.message || e) }, 500);
     }
   }
 
   // If we're in production, do not allow file-store fallback.
   if (process.env.NODE_ENV === 'production') {
-    return new Response(JSON.stringify({ error: 'Not available' }), { status: 404, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
+    return json({ ok: false, error: 'not_available' }, 404);
   }
 
   // Fallback: file-backed store used by the Express dev server (only in non-production)
@@ -109,15 +114,23 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
     const path = require('path');
     const dataFile = path.join(process.cwd(), 'server', 'data', 'wishes.json');
     if (!fs.existsSync(dataFile)) {
-      return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
+      return json({ ok: false, error: 'not_found' }, 404);
     }
     const raw = fs.readFileSync(dataFile, 'utf8');
     const arr = JSON.parse(raw || '[]');
-    const idx = arr.findIndex((x:any) => String(x.id) === String(id));
-    if (idx === -1) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'content-type':'application/json' } });
+    // Prefer exact match, then prefix
+    let idx = arr.findIndex((x:any) => String(x.id) === input);
+    if (idx === -1) {
+      const isPrefix = /^[a-f0-9]{6,32}$/i.test(input);
+      if (isPrefix) {
+        idx = arr.findIndex((x:any) => String(x.id).startsWith(input));
+      }
+    }
+    if (idx === -1) return json({ ok: false, error: 'not_found' }, 404);
+    const deletedId = arr[idx].id;
     arr.splice(idx, 1);
     fs.writeFileSync(dataFile, JSON.stringify(arr, null, 2), 'utf8');
-    const remaining = Array.isArray(arr) ? arr.filter(x => x && typeof x.id === 'string').length : 0;
+    return json({ ok: true, deleted: deletedId }, 200);
     return new Response(JSON.stringify({ ok: true, remaining }), { status: 200, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
   } catch (e: any) {
     console.error('[messages/delete] file delete failed', e?.message || e);
