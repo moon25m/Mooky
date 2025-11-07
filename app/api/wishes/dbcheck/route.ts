@@ -1,10 +1,17 @@
 export const runtime = 'edge';
 
-// Dev-only helper: run a simple SELECT to surface recent ids. Guarded to avoid exposure in production.
-export async function GET() {
+// Helper: run a simple SELECT to surface recent ids.
+// In development this is available to anyone. In production it's guarded by the admin header.
+export async function GET(req: Request) {
+  // In production require admin header to avoid accidental exposure
   if (process.env.NODE_ENV === 'production') {
-    return new Response(JSON.stringify({ error: 'Not available' }), { status: 404, headers: { 'content-type':'application/json' } });
+    const headerPass = req.headers.get('x-admin-pass') || '';
+    const expected = process.env.MOOKY_ADMIN_PASS || '';
+    if (!expected || headerPass !== expected) {
+      return new Response(JSON.stringify({ error: 'Not available' }), { status: 404, headers: { 'content-type':'application/json' } });
+    }
   }
+
   if (!process.env.DATABASE_URL) {
     return new Response(JSON.stringify({ error: 'No DATABASE_URL' }), { status: 400, headers: { 'content-type':'application/json' } });
   }
