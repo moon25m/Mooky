@@ -7,7 +7,7 @@ import { useWishCount } from '../hooks/useWishCount';
 import { useWishes as useSWRWishes } from '../hooks/useWishes';
 import { useRealtimeWishes } from '../hooks/useRealtimeWishes';
 import { mutate as globalMutate } from 'swr';
-import { setAdminFromHash, isAdmin } from '../lib/admin';
+import { ADMIN_KEY, getAdminPass, setAdminPass, clearAdminPass, extractAdminFromLocation, stripAdminFromUrl } from '../lib/admin';
 
 export type WishItem = { id: string; shortId?: string; name: string; message: string; createdAt: number };
 type WishWithFlash = WishItem & { __flash?: boolean };
@@ -35,8 +35,8 @@ function normalizeList(arr: any[]): WishItem[] {
 export default function Wish() {
   const [wishes, setWishes] = useState<WishWithFlash[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  // small local tick to force a re-render after URL-hash admin activation
-  const [, setAdminTick] = useState(0);
+  // admin pass state (stored in sessionStorage)
+  const [adminPass, setAdminPassState] = useState<string | null>(null);
   const { data: swrCount } = useWishCount();
   const { data: swrList } = useSWRWishes();
   const [name, setName] = useState('');
@@ -90,13 +90,26 @@ export default function Wish() {
     } catch {}
   }, []);
 
-  // Admin gate: check URL hash like #admin=PASS and set mooky_admin cookie
+  // Admin gate: check URL hash or query like #admin=PASS or ?admin=PASS
   useEffect(() => {
-    try { setAdminFromHash(); } catch {}
-    // setAdminFromHash only sets a cookie; force a re-render so isAdmin() is
-    // evaluated immediately and admin UI appears without a manual refresh.
-    try { setAdminTick(n => n + 1); } catch {}
+    try {
+      const incoming = extractAdminFromLocation();
+      if (incoming) {
+        setAdminPass(incoming);
+        setAdminPassState(incoming);
+        stripAdminFromUrl();
+      } else {
+        setAdminPassState(getAdminPass());
+      }
+    } catch {}
   }, []);
+
+  const isAdmin = React.useMemo(() => Boolean(adminPass), [adminPass]);
+
+  function handleAdminLogout() {
+    try { clearAdminPass(); } catch {}
+    setAdminPassState(null);
+  }
 
   // SWR polling fallback: if SSE/Pusher are unavailable, reconcile with /api/wish list periodically
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -270,6 +283,12 @@ export default function Wish() {
     <main className="wish-shell">
       <Toaster position="top-center" />
 
+      {isAdmin && (
+        <div style={{ position: 'fixed', right: 16, bottom: 16, zIndex: 60 }}>
+          <div className="admin-pill">Admin mode • <button onClick={handleAdminLogout} className="admin-logout">logout</button></div>
+        </div>
+      )}
+
       {/* HERO */}
       <section className="wish-hero">
         <div className="wish-hero-inner">
@@ -364,8 +383,9 @@ export default function Wish() {
               <header className="meta">
                 <b className="who">{w.name || 'Anonymous'}</b>
                 <time title={new Date(w.createdAt).toLocaleString()}>{timeago(w.createdAt)}</time>
-                {/* Delete button: always shown but requires admin pass (server-side) */}
-                <button
+                {isAdmin && (
+                  // Show delete control only when admin is active (via hash or cookie)
+                  <button
                   className="delete-btn"
                   aria-label={`Delete wish by ${w.name || 'Anonymous'}`}
                   onClick={async () => {
@@ -374,15 +394,11 @@ export default function Wish() {
                       const confirmMsg = `Delete this wish by ${w.name || 'Anonymous'}? This cannot be undone.`;
                       if (!window.confirm(confirmMsg)) return;
 
-                      // Admin pass: prefer sessionStorage-cached pass; prompt once and cache
-                      const ADMIN_KEY = 'mooky_admin_pass';
-                      let token = sessionStorage.getItem(ADMIN_KEY) || '';
+                      // Admin pass comes from session (set when visiting #admin=TOKEN)
+                      const token = adminPass || getAdminPass();
                       if (!token) {
-                        const prompted = window.prompt('Admin pass (stored to session for this browser)') || '';
-                        if (prompted) {
-                          try { sessionStorage.setItem(ADMIN_KEY, prompted); } catch {}
-                          token = prompted;
-                        }
+                        toast.error('Admin pass not set. Use #admin=TOKEN in URL to enable delete.');
+                        return;
                       }
 
                       // optimistic remove
@@ -390,8 +406,7 @@ export default function Wish() {
                       setWishes(prev => prev.filter(x => x.id !== w.id));
                       setTotalCount(c => Math.max(0, c - 1));
 
-                      const headers: any = {};
-                      if (token) headers['x-admin-pass'] = token;
+                      const headers: any = { 'x-admin-pass': token };
                       try { console.debug('[DELETE] header sent:', !!headers['x-admin-pass']); } catch {}
 
                       const res = await fetch(`/api/messages/${encodeURIComponent(w.id)}`, {
@@ -426,8 +441,9 @@ export default function Wish() {
                   }}
                 >
                   Delete
-                </button>
-                {isAdmin() && (
+                  </button>
+                )}
+                {isAdmin && (
                   <span style={{display:'inline-flex', alignItems:'center', gap:8}}>
                     <small className="admin-id" style={{ color:'#999'}} title={w.id}>#{String(w.shortId || String(w.id).slice(0,8))}</small>
                     <button
