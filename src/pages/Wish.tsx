@@ -7,7 +7,7 @@ import { useWishCount } from '../hooks/useWishCount';
 import { useWishes as useSWRWishes } from '../hooks/useWishes';
 import { useRealtimeWishes } from '../hooks/useRealtimeWishes';
 import { mutate as globalMutate } from 'swr';
-import { ADMIN_KEY, getAdminPass, setAdminPass, clearAdminPass, extractAdminFromLocation, stripAdminFromUrl } from '../lib/admin';
+import { getAdminPass, setAdminPass, clearAdminPass, extractAdminFromLocation, stripAdminFromUrl } from '../lib/admin';
 
 export type WishItem = { id: string; shortId?: string; name: string; message: string; createdAt: number };
 type WishWithFlash = WishItem & { __flash?: boolean };
