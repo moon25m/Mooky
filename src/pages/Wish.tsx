@@ -35,6 +35,8 @@ function normalizeList(arr: any[]): WishItem[] {
 export default function Wish() {
   const [wishes, setWishes] = useState<WishWithFlash[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
+  // small local tick to force a re-render after URL-hash admin activation
+  const [, setAdminTick] = useState(0);
   const { data: swrCount } = useWishCount();
   const { data: swrList } = useSWRWishes();
   const [name, setName] = useState('');
@@ -91,6 +93,9 @@ export default function Wish() {
   // Admin gate: check URL hash like #admin=PASS and set mooky_admin cookie
   useEffect(() => {
     try { setAdminFromHash(); } catch {}
+    // setAdminFromHash only sets a cookie; force a re-render so isAdmin() is
+    // evaluated immediately and admin UI appears without a manual refresh.
+    try { setAdminTick(n => n + 1); } catch {}
   }, []);
 
   // SWR polling fallback: if SSE/Pusher are unavailable, reconcile with /api/wish list periodically
@@ -359,67 +364,69 @@ export default function Wish() {
               <header className="meta">
                 <b className="who">{w.name || 'Anonymous'}</b>
                 <time title={new Date(w.createdAt).toLocaleString()}>{timeago(w.createdAt)}</time>
-                {isAdmin() && (
-                  <button
-                    className="delete-btn"
-                    aria-label={`Delete wish by ${w.name || 'Anonymous'}`}
-                    onClick={async () => {
-                      try {
-                        // Debug: log the real id and header presence for troubleshooting
-                        try { console.debug('[DELETE] sending id:', w.id); } catch {}
-                        const confirmMsg = `Delete this wish by ${w.name || 'Anonymous'}? This cannot be undone.`;
-                        if (!window.confirm(confirmMsg)) return;
+                {/* Delete button: always shown but requires admin pass (server-side) */}
+                <button
+                  className="delete-btn"
+                  aria-label={`Delete wish by ${w.name || 'Anonymous'}`}
+                  onClick={async () => {
+                    try {
+                      try { console.debug('[DELETE] sending id:', w.id); } catch {}
+                      const confirmMsg = `Delete this wish by ${w.name || 'Anonymous'}? This cannot be undone.`;
+                      if (!window.confirm(confirmMsg)) return;
 
-                        // Admin pass: prefer sessionStorage-cached pass in production; prompt once and cache
-                        const ADMIN_KEY = 'mooky_admin_pass';
-                        let token = sessionStorage.getItem(ADMIN_KEY) || '';
-                        if (!token) {
-                          // Prompt once and cache to sessionStorage for this browser session
-                          const prompted = window.prompt('Admin pass (stored to session for this browser)') || '';
-                          if (prompted) {
-                            try { sessionStorage.setItem(ADMIN_KEY, prompted); } catch {}
-                            token = prompted;
-                          }
+                      // Admin pass: prefer sessionStorage-cached pass; prompt once and cache
+                      const ADMIN_KEY = 'mooky_admin_pass';
+                      let token = sessionStorage.getItem(ADMIN_KEY) || '';
+                      if (!token) {
+                        const prompted = window.prompt('Admin pass (stored to session for this browser)') || '';
+                        if (prompted) {
+                          try { sessionStorage.setItem(ADMIN_KEY, prompted); } catch {}
+                          token = prompted;
                         }
-
-                        // optimistic remove
-                        const prev = wishes;
-                        setWishes(prev => prev.filter(x => x.id !== w.id));
-                        setTotalCount(c => Math.max(0, c - 1));
-
-                        const headers: any = {};
-                        // Always send header when we have a token; in prod server requires header
-                        if (token) headers['x-admin-pass'] = token;
-                        try { console.debug('[DELETE] header sent:', !!headers['x-admin-pass']); } catch {}
-
-                        const res = await fetch(`/api/messages/${encodeURIComponent(w.id)}`, {
-                          method: 'DELETE', headers
-                        });
-                        if (!res.ok) {
-                          // Restore optimistic state on failure
-                          setWishes(prev);
-                          setTotalCount(c => c + 1);
-                          // Try to parse JSON body, otherwise capture status text
-                          let body: any = null;
-                          try { body = await res.json(); } catch { body = null; }
-                          const msg = (body && body.error) ? body.error : `${res.status} ${res.statusText}`;
-                          throw new Error(msg || 'Delete failed');
-                        }
-                        const body = await res.json().catch(() => ({} as any));
-                        const remaining = typeof body?.remaining === 'number' ? body.remaining : null;
-                        toast.success('Deleted');
-                        // Revalidate list
-                        try { globalMutate('/api/wishes'); } catch {}
-                        // Update count cache with returned remaining (no revalidation)
-                        try { globalMutate('/api/wishes/count', remaining !== null ? remaining : undefined, false); } catch {}
-                      } catch (err) {
-                        toast.error((err as Error)?.message || 'Could not delete');
                       }
-                    }}
-                  >
-                    Delete
-                  </button>
-                )}
+
+                      // optimistic remove
+                      const prev = wishes;
+                      setWishes(prev => prev.filter(x => x.id !== w.id));
+                      setTotalCount(c => Math.max(0, c - 1));
+
+                      const headers: any = {};
+                      if (token) headers['x-admin-pass'] = token;
+                      try { console.debug('[DELETE] header sent:', !!headers['x-admin-pass']); } catch {}
+
+                      const res = await fetch(`/api/messages/${encodeURIComponent(w.id)}`, {
+                        method: 'DELETE', headers
+                      });
+                      if (!res.ok) {
+                        // Restore optimistic state on failure
+                        setWishes(prev);
+                        setTotalCount(c => c + 1);
+                        let body: any = null;
+                        try { body = await res.json(); } catch { body = null; }
+                        const msg = (body && body.error) ? body.error : `${res.status} ${res.statusText}`;
+                        throw new Error(msg || 'Delete failed');
+                      }
+                      const body = await res.json().catch(() => ({} as any));
+                      const remaining = typeof body?.remaining === 'number' ? body.remaining : null;
+                      toast.success('Deleted');
+                      try { globalMutate('/api/wishes'); } catch {}
+                      try { globalMutate('/api/wishes/count', remaining !== null ? remaining : undefined, false); } catch {}
+                    } catch (err) {
+                      // Provide clearer error guidance for production vs auth issues
+                      const msg = (err as Error)?.message || 'Could not delete';
+                      // If unauthorized, give a hint to check production admin secret
+                      if (/401|Unauthorized|Unauthorized/.test(String(msg))) {
+                        toast.error('Unauthorized — check admin pass (server) or Vercel env MOOKY_ADMIN_PASS');
+                      } else if (/503|Server not configured/.test(String(msg))) {
+                        toast.error('Server not configured — check DATABASE_URL and MOOKY_ADMIN_PASS on Vercel');
+                      } else {
+                        toast.error(msg);
+                      }
+                    }
+                  }}
+                >
+                  Delete
+                </button>
                 {isAdmin() && (
                   <span style={{display:'inline-flex', alignItems:'center', gap:8}}>
                     <small className="admin-id" style={{ color:'#999'}} title={w.id}>#{String(w.shortId || String(w.id).slice(0,8))}</small>
