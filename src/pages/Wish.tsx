@@ -364,6 +364,10 @@ export default function Wish() {
                     aria-label={`Delete wish by ${w.name || 'Anonymous'}`}
                     onClick={async () => {
                       try {
+                        // Dev-only: log the real id for debugging
+                        if (process.env.NODE_ENV !== 'production') {
+                          try { console.log('[dev] delete id', w.id); } catch {}
+                        }
                         const confirmMsg = `Delete this wish by ${w.name || 'Anonymous'}? This cannot be undone.`;
                         if (!window.confirm(confirmMsg)) return;
                         const token = window.prompt('Admin pass (or leave blank to use session)') || '';
@@ -404,7 +408,17 @@ export default function Wish() {
                   </button>
                 )}
                 {isAdmin() && (
-                  <small className="admin-id" style={{marginLeft:8, color:'#999'}} title={w.id}>#{String(w.id).slice(0,8)}</small>
+                  <span style={{display:'inline-flex', alignItems:'center', gap:8}}>
+                    <small className="admin-id" style={{ color:'#999'}} title={w.id}>#{String(w.id).slice(0,8)}</small>
+                    <button
+                      className="copy-id"
+                      title="Copy full id"
+                      onClick={(e)=>{ e.stopPropagation(); try { navigator.clipboard.writeText(w.id); toast.success('Copied id'); } catch { toast.error('Copy failed'); } }}
+                      style={{ background:'transparent', border:'none', color:'#bbb', cursor:'pointer' }}
+                    >
+                      ⧉
+                    </button>
+                  </span>
                 )}
               </header>
               <p className="text" dangerouslySetInnerHTML={{ __html: linkifyText(w.message) }} />

@@ -63,11 +63,23 @@ export async function DELETE(req: Request, { params }:{ params: { id: string } }
         )`;
       } catch {}
 
-      const rows = await sql`delete from wishes where id = ${id} returning id` as any;
+      // Try exact id delete first
+      let rows = await sql`delete from wishes where id = ${id} returning id` as any;
+      // If not found and id looks like an 8-char hex, try prefix match (short id)
+      if ((!Array.isArray(rows) || rows.length === 0) && /^[0-9a-f]{8}$/i.test(String(id))) {
+        try {
+          rows = await sql`delete from wishes where left(id, 8) = ${id} returning id` as any;
+          if (Array.isArray(rows) && rows.length > 1) {
+            try { console.warn('[messages/delete] deleted multiple rows for short id', { id, deleted: rows.length }); } catch {}
+          }
+        } catch (e) {
+          console.error('[messages/delete] prefix delete failed', e?.message || e);
+        }
+      }
       if (!Array.isArray(rows) || rows.length === 0) {
-          // Log missing id for diagnostics
-          try { console.error('[messages/delete] not found', { id }); } catch {}
-          return new Response(JSON.stringify({ error: 'Not found', id }), { status: 404, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
+        // Log missing id for diagnostics
+        try { console.error('[messages/delete] not found', { id }); } catch {}
+        return new Response(JSON.stringify({ error: 'Not found', id }), { status: 404, headers: { 'content-type':'application/json', 'Cache-Control':'no-store' } });
       }
       // get remaining count
       try {

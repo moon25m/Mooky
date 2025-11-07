@@ -87,13 +87,25 @@ exports.wishesStore = {
   push(w){ wishes.push(w); persist(); bus.emit('wish', w); },
   // Delete a wish by id. Returns true if deleted.
   delete(id){
-    const idx = wishes.findIndex(x => String(x.id) === String(id));
-    if (idx === -1) return false;
-    const [removed] = wishes.splice(idx, 1);
-    try { persist(); } catch (e) { console.error('[wishesStore] persist on delete failed', e); }
-    // emit a delete event in case listeners want to react
-    try { bus.emit('wish:deleted', removed); } catch {}
-    return true;
+    // Accept exact id or an 8-char hex short id (prefix).
+    try {
+      const sid = String(id || '');
+      // exact match first
+      let idx = wishes.findIndex(x => String(x.id) === sid);
+      // if not found and sid looks like an 8-hex, match by prefix
+      if (idx === -1 && /^[0-9a-f]{8}$/i.test(sid)) {
+        idx = wishes.findIndex(x => String(x.id).slice(0,8).toLowerCase() === sid.toLowerCase());
+      }
+      if (idx === -1) return false;
+      const [removed] = wishes.splice(idx, 1);
+      try { persist(); } catch (e) { console.error('[wishesStore] persist on delete failed', e); }
+      // emit a delete event in case listeners want to react
+      try { bus.emit('wish:deleted', removed); } catch {}
+      return true;
+    } catch (e) {
+      console.error('[wishesStore] delete error', e);
+      return false;
+    }
   },
   // Async count of wishes (reads file for authoritative value)
   async count() {

@@ -75,7 +75,7 @@ app.get('/api/wishes/stream', (req, res) => {
 });
 
 // Admin-only delete endpoint for dev server (file-backed store)
-app.delete('/api/messages/:id', (req, res) => {
+app.delete('/api/messages/:id', async (req, res) => {
   try {
     const id = String(req.params.id || '');
     if (!id) return res.status(400).json({ ok: false, error: 'Missing id' });
@@ -88,7 +88,7 @@ app.delete('/api/messages/:id', (req, res) => {
     }
 
     const ok = wishesStore.delete(id);
-    if (!ok) return res.status(404).json({ ok: false, error: 'Not found' });
+    if (!ok) return res.status(404).json({ ok: false, error: 'Not found', id });
     // return remaining count
     try {
       const remaining = await (wishesStore.count ? wishesStore.count() : Promise.resolve(wishesStore.all().length));
